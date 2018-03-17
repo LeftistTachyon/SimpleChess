@@ -97,6 +97,7 @@ public class ClientCommunication {
         public Handler(Socket socket) {
             this.socket = socket;
             cb = new ChessBoard();
+            cb.recalculateMoves();
         }
         
         /**
@@ -155,9 +156,9 @@ public class ClientCommunication {
                                 Handler one = unmatched.remove(), two = unmatched.remove();
                                 int iD = matchedHandlers.size();
                                 matchedHandlers.put(iD, one);
-                                one.opponentID = iD;
+                                one.opponentID = iD + 1;
                                 matchedHandlers.put(iD+1, two);
-                                two.opponentID = iD + 1;
+                                two.opponentID = iD;
                                 one.opponentName = two.name;
                                 two.opponentName = one.name;
                                 // STARTGAMEside name timecontrolMin timecontrolSec gameID
@@ -208,6 +209,8 @@ public class ClientCommunication {
                         opponent.println(message);
                         opponent.opponentName = null;
                         opponent.opponentID = -1;
+                    } else if(line.startsWith("PING")) {
+                        out.println("PING");
                     }
                     String message = null;
                     if(cb.insufficientMaterial()){

@@ -333,6 +333,7 @@ public class ChessBoard {
      * @param toWhereY where to move a piece
      */
     public void movePiece(int fromWhereX, int fromWhereY, int toWhereX, int toWhereY) {
+        if(board[fromWhereX][fromWhereY] == null) return;
         ChessBoard thisCopy = new ChessBoard(this);
         maybeMove(fromWhereX, fromWhereY, toWhereX, toWhereY);
         if(board[toWhereX][toWhereY].getCharRepresentation().equals("K")) {
@@ -398,7 +399,14 @@ public class ChessBoard {
         
         board[toWhereX][toWhereY] = board[fromWhereX][fromWhereY];
         board[fromWhereX][fromWhereY] = null;
-        if(board[toWhereX][toWhereY].getCharRepresentation().equals("K")) kingPos.put(playerIsWhite, toSquare(toWhereX, toWhereY));
+        if(
+                board[toWhereX][toWhereY]
+                        .getCharRepresentation()
+                        .equals("K")) 
+            kingPos.put(
+                    playerIsWhite, 
+                    toSquare(toWhereX, toWhereY)
+            );
     }
     
     /**
