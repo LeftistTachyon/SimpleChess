@@ -185,4 +185,18 @@ public abstract class AbstractPiece {
      * @return the character that represents this piece
      */
     public abstract String getCharRepresentation();
+    
+    /**
+     * Determines the class name of the object
+     * @param o the object to find the class name of
+     * @return the class name of the object
+     */
+    public static String getClassName(Object o) {
+        Class<?> enclosingClass = o.getClass().getEnclosingClass();
+        if(enclosingClass != null) {
+            return enclosingClass.getName();
+        } else {
+            return o.getClass().getName();
+        }
+    }
 }

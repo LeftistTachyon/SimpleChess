@@ -1,6 +1,7 @@
 package simplechessserver;
 
 import java.io.IOException;
+import java.net.BindException;
 import java.net.ServerSocket;
 
 /**
@@ -15,10 +16,12 @@ public class SimpleChessServerMain {
      */
     public static void main(String[] args) throws IOException {
         System.out.println("The chess server is running.");
-        try (ServerSocket listener = new ServerSocket(ClientCommunication.PORT)) {
-            while (true) {
+        try(ServerSocket listener = new ServerSocket(ClientCommunication.PORT)) {
+            while(true) {
                 new ClientCommunication.Handler(listener.accept()).start();
             }
+        } catch(BindException be) {
+            System.err.println("Cannot start server: " + be.getMessage());
         }
     }
 }

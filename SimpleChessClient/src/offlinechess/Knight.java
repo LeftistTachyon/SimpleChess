@@ -20,7 +20,8 @@ public class Knight extends AbstractPiece {
     @Override
     public LinkedList<String> allLegalMoves(ChessBoard cb, String currentPosition) {
         if(!ChessBoard.isValidSquare(currentPosition)) throw new IllegalArgumentException("Invalid square");
-        if(!(cb.getPiece(currentPosition).getCharRepresentation().equals("N"))) throw new IllegalArgumentException("This isn\'t a knight!");
+        if(cb.getPiece(currentPosition) == null) throw new IllegalArgumentException("This is a null piece");
+        if(!(cb.getPiece(currentPosition).getCharRepresentation().equals("N"))) throw new IllegalArgumentException("This isn\'t a knight! It\'s a " + AbstractPiece.getClassName(cb.getPiece(currentPosition)));
         LinkedList<String> output = new LinkedList<>();
         String temp;
         if(ChessBoard.isValidShift(currentPosition, -2, -1)) {

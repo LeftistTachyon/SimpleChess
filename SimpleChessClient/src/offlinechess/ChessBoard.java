@@ -84,6 +84,12 @@ public class ChessBoard {
     private String draggingFrom = null;
     
     /**
+     * A piece's square to be dragging from<br>
+     * Controls dragging pieces
+     */
+    private String fakeDraggingFrom = null;
+    
+    /**
      * The last known non-null point the mouse was at.<br>
      * Controls dragging pieces
      */
@@ -331,10 +337,10 @@ public class ChessBoard {
      * @param g2D Graphics2D to draw on
      */
     private void drawPieces(Graphics2D g2D) {
-        for (int i = 0; i < board.length; ++i) {
-            for (int j = 0; j < board[i].length; ++j) {
-                if (board[i][j] != null) {
-                    if (toSquare(i, j).equals(draggingFrom)) {
+        for(int i = 0; i < board.length; ++i) {
+            for(int j = 0; j < board[i].length; ++j) {
+                if(board[i][j] != null) {
+                    if(toSquare(i, j).equals(draggingFrom) || toSquare(i, j).equals(fakeDraggingFrom)) {
                         if(fromPerspective) {
                             board[i][j].drawGhost(g2D, (i * SQUARE_SIZE) + 7 + x, 
                                     (j * SQUARE_SIZE) + 7 + y, 50, 50);
@@ -592,10 +598,16 @@ public class ChessBoard {
      * @param g2D the Graphics2D to draw on
      */
     private void drawDraggedPiece(Graphics2D g2D) {
-        if(draggingFrom == null/* || lastPoint == null*/) return;
-        int midX = lastPoint.x - (SQUARE_SIZE/2), 
-                midY = lastPoint.y - (SQUARE_SIZE/2);
-        getPiece(draggingFrom).draw(g2D, midX, midY, 50, 50);
+        if(draggingFrom != null) {
+            int midX = lastPoint.x - (SQUARE_SIZE / 2),
+                    midY = lastPoint.y - (SQUARE_SIZE / 2);
+            getPiece(draggingFrom).draw(g2D, midX, midY, 50, 50);
+        }
+        if(fakeDraggingFrom != null) {
+            int midX = lastPoint.x - (SQUARE_SIZE / 2),
+                    midY = lastPoint.y - (SQUARE_SIZE / 2);
+            getPiece(fakeDraggingFrom).draw(g2D, midX, midY, 50, 50);
+        }
     }
     
     /**
@@ -782,12 +794,13 @@ public class ChessBoard {
      */
     public void recalculateMoves() {
         allLegalMoves = new HashMap<>();
+        ChessBoard duplicate = new ChessBoard(this);
         for(int i = 0; i < board.length; i++) {
             for(int j = 0; j < board[i].length; j++) {
                 if(board[i][j] == null) continue;
                 if(board[i][j].isWhite == playerIsWhite) {
                     String current = ChessBoard.toSquare(i, j);
-                    LinkedList<String> moves = board[i][j].legalMoves(this, current);
+                    LinkedList<String> moves = board[i][j].legalMoves(duplicate, current);
                     allLegalMoves.put(current, moves);
                 }
             }
@@ -831,14 +844,14 @@ public class ChessBoard {
         String kingAt = kingPos.get(playerIsWhite);
         ((King)(board[getColumn(kingAt)][getRow(kingAt)])).notifyNoCheck();
         System.out.println("Moved: " + playerIsWhite);
-        playerIsWhite = !playerIsWhite;
-        recalculateMoves();
-        updatePos(miniFEN());
-        mr.moved(thisCopy, this, ChessBoard.toSquare(fromWhereX, fromWhereY), ChessBoard.toSquare(toWhereX, toWhereY));
         lastMoveFrom = toSquare(fromWhereX, fromWhereY);
         lastMoveTo = toSquare(toWhereX, toWhereY);
         if(playerIsWhite == fromPerspective) 
             notifyListeners("MOVE" + lastMoveFrom + " " + lastMoveTo);
+        playerIsWhite = !playerIsWhite;
+        recalculateMoves();
+        updatePos(miniFEN());
+        mr.moved(thisCopy, this, ChessBoard.toSquare(fromWhereX, fromWhereY), ChessBoard.toSquare(toWhereX, toWhereY));
         if(checkMated(playerIsWhite)) System.out.println("Checkmate!\n");
         else if(inCheck(playerIsWhite)) {
             ((King)(getPiece(kingPos.get(playerIsWhite)))).notifyCheck();
@@ -1294,8 +1307,11 @@ public class ChessBoard {
      */
     public void enableDragging(String fromWhere) {
         if(!isEmptySquare(fromWhere)) 
-            if(getPiece(fromWhere).isWhite == playerIsWhite) 
+            if(getPiece(fromWhere).isWhite == playerIsWhite 
+                    && playerIsWhite == fromPerspective) 
                 draggingFrom = fromWhere;
+            else
+                fakeDraggingFrom = fromWhere;
         System.out.println("selected: " + selected);
     }
     
@@ -1303,6 +1319,10 @@ public class ChessBoard {
      * Disables dragging.
      */
     public void disableDragging() {
+        if(fakeDraggingFrom != null) {
+            fakeDraggingFrom = null;
+            return;
+        }
         if(draggingFrom == null) return;
         String dropSquare = toPerspectiveSquare((lastPoint.x-x)/SQUARE_SIZE, (lastPoint.y-y)/SQUARE_SIZE);
         /*if(getPiece(draggingFrom).isLegalMove(this, draggingFrom, dropSquare)) {

@@ -61,8 +61,7 @@ public class King extends AbstractPiece {
                     if(ap == null) continue;
                     if((ap.isWhite == isWhite) || (ap.getCharRepresentation().equals("K"))) continue;
                     String fromWhere = ChessBoard.toSquare(i, j);
-                    if(ap.isAllLegalMove(cb, fromWhere, ChessBoard.toSquare(1, row)) || 
-                            ap.isAllLegalMove(cb, fromWhere, ChessBoard.toSquare(2, row)) ||
+                    if(ap.isAllLegalMove(cb, fromWhere, ChessBoard.toSquare(2, row)) ||
                             ap.isAllLegalMove(cb, fromWhere, ChessBoard.toSquare(3, row))) {
                         canQ = false;
                     }

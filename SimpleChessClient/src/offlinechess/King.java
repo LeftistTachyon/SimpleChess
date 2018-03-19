@@ -30,7 +30,8 @@ public class King extends AbstractPiece {
     @Override
     public LinkedList<String> allLegalMoves(ChessBoard cb, String currentPosition) {
         if(!ChessBoard.isValidSquare(currentPosition)) throw new IllegalArgumentException("Invalid square");
-        if(!(cb.getPiece(currentPosition).getCharRepresentation().equals("K"))) throw new IllegalArgumentException("This isn\'t a king!");
+        if(cb.getPiece(currentPosition) == null) throw new IllegalArgumentException("This is a null piece");
+        if(!(cb.getPiece(currentPosition).getCharRepresentation().equals("K"))) throw new IllegalArgumentException("This isn\'t a king! It\'s a " + AbstractPiece.getClassName(cb.getPiece(currentPosition)));
         LinkedList<String> output = new LinkedList<>();
         String temp;
         for(int i = -1; i <= 1; i++) {
@@ -61,8 +62,7 @@ public class King extends AbstractPiece {
                     if(ap == null) continue;
                     if((ap.isWhite == isWhite) || (ap.getCharRepresentation().equals("K"))) continue;
                     String fromWhere = ChessBoard.toSquare(i, j);
-                    if(ap.isAllLegalMove(cb, fromWhere, ChessBoard.toSquare(1, row)) || 
-                            ap.isAllLegalMove(cb, fromWhere, ChessBoard.toSquare(2, row)) ||
+                    if(ap.isAllLegalMove(cb, fromWhere, ChessBoard.toSquare(2, row)) ||
                             ap.isAllLegalMove(cb, fromWhere, ChessBoard.toSquare(3, row))) {
                         canQ = false;
                     }

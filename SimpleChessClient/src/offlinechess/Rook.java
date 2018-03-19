@@ -20,7 +20,8 @@ public class Rook extends AbstractPiece {
     @Override
     public LinkedList<String> allLegalMoves(ChessBoard cb, String currentPosition) {
         if(!ChessBoard.isValidSquare(currentPosition)) throw new IllegalArgumentException("Invalid square");
-        if(!(cb.getPiece(currentPosition).getCharRepresentation().equals("R"))) throw new IllegalArgumentException("This isn\'t a rook!");
+        if(cb.getPiece(currentPosition) == null) throw new IllegalArgumentException("This is a null piece");
+        if(!(cb.getPiece(currentPosition).getCharRepresentation().equals("R"))) throw new IllegalArgumentException("This isn\'t a rook! It\'s a " + AbstractPiece.getClassName(cb.getPiece(currentPosition)));
         LinkedList<String> output = new LinkedList<>();
         String temp;
         if(ChessBoard.isValidShift(currentPosition, 1, 0)) {

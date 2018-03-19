@@ -20,7 +20,8 @@ public class Pawn extends AbstractPiece {
     @Override
     public LinkedList<String> allLegalMoves(ChessBoard cb, String currentPosition) {
         if(!ChessBoard.isValidSquare(currentPosition)) throw new IllegalArgumentException("Invalid square");
-        if(!(cb.getPiece(currentPosition).getCharRepresentation().equals("P"))) throw new IllegalArgumentException("This isn\'t a pawn!");
+        if(cb.getPiece(currentPosition) == null) throw new IllegalArgumentException("This is a null piece");
+        if(!(cb.getPiece(currentPosition).getCharRepresentation().equals("P"))) throw new IllegalArgumentException("This isn\'t a pawn! It\'s a " + AbstractPiece.getClassName(cb.getPiece(currentPosition)));
         LinkedList<String> output = new LinkedList<>();
         int row = ChessBoard.getRow(currentPosition), column = ChessBoard.getColumn(currentPosition);
         if(isWhite) {

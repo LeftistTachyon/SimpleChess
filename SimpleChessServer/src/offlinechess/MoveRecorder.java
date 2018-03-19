@@ -319,7 +319,7 @@ public class MoveRecorder {
      */
     private String moveString(ChessBoard before, String fromWhere, String toWhere, AbstractPiece piece, int whichPiece, boolean capture) {
         if(!piece.isAllLegalMove(before, fromWhere, toWhere)) 
-            throw new IllegalArgumentException("This isn\'t a legal move");
+            throw new IllegalArgumentException("This isn\'t a legal move: from " + fromWhere + " to " + toWhere);
         ArrayList<String> allPiece = before.findAll(whichPiece, piece.isWhite);
         boolean needRank = false, needFile = false;
         for(String square:allPiece) {

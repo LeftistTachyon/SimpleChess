@@ -183,6 +183,7 @@ public class ClientCommunication {
                         String[] data = line.substring(4).split(" ");
                         cb.movePiece(data[0], data[1]);
                         Handler opponent = matchedHandlers.get(opponentID);
+                        opponent.cb.movePiece(data[0], data[1]);
                         opponent.out.println(line);
                         opponent.println(line);
                     } else if(line.startsWith("PROMOTE") && opponentID != -1) {

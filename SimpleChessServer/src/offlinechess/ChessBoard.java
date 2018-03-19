@@ -195,7 +195,10 @@ public class ChessBoard {
     public static int getColumn(String s) {
         if(isValidSquare(s)) {
             return s.charAt(0)-'a';
-        } else throw new IllegalArgumentException("Invalid square");
+        } else {
+            System.out.println("Invalid: " + s);
+            throw new IllegalArgumentException("Invalid square");
+        }
     }
     
     /**
@@ -399,14 +402,22 @@ public class ChessBoard {
         
         board[toWhereX][toWhereY] = board[fromWhereX][fromWhereY];
         board[fromWhereX][fromWhereY] = null;
-        if(
-                board[toWhereX][toWhereY]
-                        .getCharRepresentation()
-                        .equals("K")) 
-            kingPos.put(
-                    playerIsWhite, 
-                    toSquare(toWhereX, toWhereY)
-            );
+        
+        try {
+            if (board[toWhereX][toWhereY]
+                    .getCharRepresentation()
+                    .equals("K")) {
+                kingPos.put(
+                        playerIsWhite,
+                        toSquare(toWhereX, toWhereY)
+                );
+            }
+        } catch (NullPointerException npe) {
+            System.out.println("\n\nNULLPOINTEREXCEPTION");
+            printBoard();
+            System.out.println(board[toWhereX][toWhereY]);
+            System.out.println(board[toWhereX][toWhereY].getCharRepresentation());
+        }
     }
     
     /**
@@ -792,7 +803,11 @@ public class ChessBoard {
                 AbstractPiece ap = board[j][i];
                 if(ap == null) {
                     System.out.print(" ");
-                } else System.out.print(ap.getCharRepresentation());
+                } else if(ap.isWhite) {
+                    System.out.print(ap.getCharRepresentation());
+                } else {
+                    System.out.print(ap.getCharRepresentation().toLowerCase());
+                }
             }
             System.out.println();
         }
