@@ -12,7 +12,10 @@ import javax.imageio.ImageIO;
  * @author Jed Wang
  */
 public class Knight extends AbstractPiece {
-
+    /**
+     * Creates a new Knight
+     * @param isWhite whether the knight is white or black
+     */
     public Knight(boolean isWhite) {
         super(isWhite);
     }

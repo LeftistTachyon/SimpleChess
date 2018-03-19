@@ -23,6 +23,10 @@ public class King extends AbstractPiece {
      */
     private boolean inCheck = false;
 
+    /**
+     * Creates a new King
+     * @param isWhite whether the king is white or black
+     */
     public King(boolean isWhite) {
         super(isWhite);
     }

@@ -12,7 +12,10 @@ import javax.imageio.ImageIO;
  * @author Jed Wang
  */
 public class Bishop extends AbstractPiece {
-
+    /**
+     * Creates a new Bishop
+     * @param isWhite whether the bishop is white or black
+     */
     public Bishop(boolean isWhite) {
         super(isWhite);
     }

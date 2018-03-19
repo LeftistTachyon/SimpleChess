@@ -12,7 +12,10 @@ import javax.imageio.ImageIO;
  * @author Jed Wang
  */
 public class Rook extends AbstractPiece {
-
+    /**
+     * Creates a new Rook
+     * @param isWhite whether the rook is white or black
+     */
     public Rook(boolean isWhite) {
         super(isWhite);
     }
