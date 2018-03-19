@@ -12,7 +12,10 @@ import javax.imageio.ImageIO;
  * @author Jed Wang
  */
 public class Pawn extends AbstractPiece {
-    
+    /**
+     * Creates a new Pawn
+     * @param isWhite whether the pawn is white or black
+     */
     public Pawn(boolean isWhite) {
         super(isWhite);
     }

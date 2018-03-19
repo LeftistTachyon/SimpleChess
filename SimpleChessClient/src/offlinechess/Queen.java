@@ -12,7 +12,10 @@ import javax.imageio.ImageIO;
  * @author Jed Wang
  */
 public class Queen extends AbstractPiece {
-
+    /**
+     * Creates a new Queen
+     * @param isWhite whether the queen is white or black
+     */
     public Queen(boolean isWhite) {
         super(isWhite);
     }
