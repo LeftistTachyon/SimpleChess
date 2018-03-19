@@ -8,6 +8,10 @@ import java.net.ConnectException;
 import java.net.Socket;
 import java.util.Scanner;
 
+/**
+ * The class which communicates between this and the server
+ * @author Jed Wang
+ */
 public class ServerCommunication {
     /**
      * The socket connection into this
@@ -19,6 +23,10 @@ public class ServerCommunication {
      */
     private PrintWriter out;
     
+    /**
+     * Creates a new ServerCommunication
+     * @throws IOException if something goes wrong
+     */
     public ServerCommunication() throws IOException {
         run();
     }

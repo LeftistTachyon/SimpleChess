@@ -12,9 +12,19 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 
+/**
+ * The GUI for the Simplestestestestestest
+ * @author Jed Wang
+ */
 public class GUI extends JFrame {
+    /**
+     * The outwards line
+     */
     private PrintWriter out;
     
+    /**
+     * The area of text
+     */
     private String areaText;
     
     /** Creates new form GUI
@@ -81,6 +91,11 @@ public class GUI extends JFrame {
         pack();
     }// </editor-fold>                        
     
+    /**
+     * Runs the GUI and starts it
+     * @param pw the PrintWriter to write out of
+     * @return the GUI created
+     */
     public static GUI run(PrintWriter pw) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -108,21 +123,35 @@ public class GUI extends JFrame {
         return output;
     }
     
+    /**
+     * Clears the text area.
+     */
     public void clear() {
         areaText = "";
         update();
     }
     
+    /**
+     * Prints a carriage return.
+     */
     public void println() {
         areaText += "\n";
         update();
     }
     
+    /**
+     * Prints a String followed by a carriage return
+     * @param s the String to print
+     */
     public void println(String s) {
         areaText += s + "\n";
         update();
     }
     
+    /**
+     * Prints a String
+     * @param s the String to print
+     */
     public void print(String s) {
         areaText += s;
         update();
