@@ -1220,7 +1220,7 @@ public class ChessBoard {
      */
     public void clicked(String square) {
         if(selected == null && promotion == -1) {
-            if(!isEmptySquare(square) && (getPiece(square).isWhite == playerIsWhite)) {
+            if(!isEmptySquare(square) && (getPiece(square).isWhite == playerIsWhite && playerIsWhite == fromPerspective)) {
                 selected = square;
             }
         } else if(promotion != -1) {

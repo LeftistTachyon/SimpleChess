@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ConnectException;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import javax.swing.JOptionPane;
 import offlinechess.ChessBoard;
 import offlinechess.ChessFrame;
@@ -85,8 +86,14 @@ public class ServerCommunication {
         Socket socket;
         try {
             socket = new Socket(serverAddress, 9001);
-        } catch (ConnectException cexp) {
+        } catch(ConnectException cexp) {
             JOptionPane.showMessageDialog(cf, cexp.getMessage(), 
+                    "Connection Error", JOptionPane.ERROR_MESSAGE);
+            cf.dispose();
+            System.exit(0);
+            return;
+        } catch(UnknownHostException uhe) {
+            JOptionPane.showMessageDialog(cf, uhe.getMessage(), 
                     "Connection Error", JOptionPane.ERROR_MESSAGE);
             cf.dispose();
             System.exit(0);
