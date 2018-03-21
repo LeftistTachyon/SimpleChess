@@ -25,13 +25,6 @@ public class ChessBoard {
     private MoveRecorder mr;
     
     /**
-     * Which column the pawn is to be promoting.<br>
-     * -1 stands for no promotion<br>
-     * Controls the promotion dialog
-     */
-    private int promotion = -1;
-    
-    /**
      * The squares open for en passant.<br>
      * null stands for no open squares<br>
      * Controls en passant
@@ -47,12 +40,6 @@ public class ChessBoard {
      * A Map of the king's position
      */
     private HashMap<Boolean, String> kingPos;
-    
-    /**
-     * The square a pawn is promoting from<br>
-     * Controls promotion
-     */
-    private String promotingFrom = null;
     
     /**
      * Counts how many times a position repeats<br>
