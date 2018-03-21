@@ -190,6 +190,7 @@ public class ClientCommunication {
                         String[] data = line.substring(7).split(" ");
                         cb.promotePiece(data[0], data[1], Integer.parseInt(data[2]));
                         Handler opponent = matchedHandlers.get(opponentID);
+                        opponent.cb.promotePiece(data[0], data[1], Integer.parseInt(data[2]));
                         opponent.out.println(line);
                         opponent.println(line);
                     } else if(line.startsWith("TIMEOUT") && opponentID != -1) {
