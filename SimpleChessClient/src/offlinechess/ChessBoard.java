@@ -933,14 +933,14 @@ public class ChessBoard {
             default:
                 throw new IllegalArgumentException("Unknown piece" + toWhatPiece);
         }
-        playerIsWhite = !playerIsWhite;
-        mr.moved(thisCopy, this, fromWhere, toWhere);
-        System.out.println("Promoted from " + fromWhere + " to " + toWhere + " to a " + toWhatPiece);
-        recalculateMoves();
         lastMoveFrom = toSquare(fromWhereX, fromWhereY);
         lastMoveTo = toSquare(toWhereX, toWhereY);
         if(playerIsWhite == fromPerspective) 
             notifyListeners("PROMOTE" + lastMoveFrom + " " + lastMoveTo + " " + toWhatPiece);
+        playerIsWhite = !playerIsWhite;
+        mr.moved(thisCopy, this, fromWhere, toWhere);
+        System.out.println("Promoted from " + fromWhere + " to " + toWhere + " to a " + toWhatPiece);
+        recalculateMoves();
         if(checkMated(playerIsWhite)) System.out.println("Checkmate!\n");
         else if(inCheck(playerIsWhite)) System.out.println("Check!\n");
         else if(stalemated(playerIsWhite)) System.out.println("Stalemate.\n");
@@ -1225,7 +1225,7 @@ public class ChessBoard {
             }
         } else if(promotion != -1) {
             if(ChessBoard.getColumn(square) == promotion) {
-                String promoteTo = toSquare((playerIsWhite)?7:0, (fromPerspective)?promotion:7-promotion);
+                String promoteTo = toSquare(promotion/*(fromPerspective)?promotion:7-promotion*/, (playerIsWhite)?0:7);
                 if(playerIsWhite) {
                     /**
                      * QUEEN

@@ -123,7 +123,7 @@ public class ServerCommunication {
                 // STARTGAMEside name timecontrolMin timecontrolSec gameID
                 String[] data = line.substring(9).split(" ");
                 cb.setPerspective(Boolean.parseBoolean(data[0]));
-                // data[1] will be other person's name
+                // data[1] will be other person's name: will be used later
                 tc = new TimeControl(Integer.parseInt(data[2]) * 60, Integer.parseInt(data[3]));
                 tc.start();
                 tc.addActionListener((ActionEvent e) -> {
