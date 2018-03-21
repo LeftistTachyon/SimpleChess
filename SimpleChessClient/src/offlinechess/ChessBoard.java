@@ -281,7 +281,7 @@ public class ChessBoard {
      */
     private void drawCheckers(Graphics2D g2D) {
         g2D.setColor(new Color(181, 136, 99));
-        g2D.fillRect(x, y, x+8*SQUARE_SIZE, y+8*SQUARE_SIZE);
+        g2D.fillRect(x, y, 8*SQUARE_SIZE, 8*SQUARE_SIZE);
         g2D.setColor(new Color(240, 217, 181));
         for(int i = x;i<8*SQUARE_SIZE+x;i+=SQUARE_SIZE*2) {
             for(int j = y;j<8*SQUARE_SIZE+y;j+=SQUARE_SIZE*2) {
@@ -318,16 +318,16 @@ public class ChessBoard {
         if(fromPerspective) {
             for (int i = 0; i < 8; i++) {
                 g2D.drawString((char) ('a' + i) + "",
-                        SQUARE_SIZE * i + (SQUARE_SIZE / 2) - 3, SQUARE_SIZE * 8 + 12);
-                g2D.drawString((8 - i) + "", SQUARE_SIZE * 8 + 3,
-                        SQUARE_SIZE * i + (SQUARE_SIZE / 2) + 6);
+                        SQUARE_SIZE * i + (SQUARE_SIZE / 2) - 3 + x, SQUARE_SIZE * 8 + 12 + y);
+                g2D.drawString((8 - i) + "", SQUARE_SIZE * 8 + 3 + x,
+                        SQUARE_SIZE * i + (SQUARE_SIZE / 2) + 6 + y);
             }
         } else {
             for (int i = 0; i < 8; i++) {
                 g2D.drawString((char) ('a' + 7 - i) + "",
-                        SQUARE_SIZE * i + (SQUARE_SIZE / 2) - 3, SQUARE_SIZE * 8 + 12);
-                g2D.drawString((i + 1) + "", SQUARE_SIZE * 8 + 3,
-                        SQUARE_SIZE * i + (SQUARE_SIZE / 2) + 6);
+                        SQUARE_SIZE * i + (SQUARE_SIZE / 2) - 3 + x, SQUARE_SIZE * 8 + 12 + y);
+                g2D.drawString((i + 1) + "", SQUARE_SIZE * 8 + 3 + x,
+                        SQUARE_SIZE * i + (SQUARE_SIZE / 2) + 6 + y);
             }
         }
     }
@@ -659,6 +659,7 @@ public class ChessBoard {
      * @return whether the square is valid
      */
     public static boolean isValidSquare(String s) {
+        if(s == null) return false;
         if(s.length() == 2) {
             int col = s.charAt(0)-'a', 
                     row = 8 - Integer.parseInt(s.charAt(1) + "");
@@ -1225,7 +1226,7 @@ public class ChessBoard {
             }
         } else if(promotion != -1) {
             if(ChessBoard.getColumn(square) == promotion) {
-                String promoteTo = toSquare(promotion/*(fromPerspective)?promotion:7-promotion*/, (playerIsWhite)?0:7);
+                String promoteTo = toSquare(promotion, (playerIsWhite)?0:7);
                 if(playerIsWhite) {
                     /**
                      * QUEEN
