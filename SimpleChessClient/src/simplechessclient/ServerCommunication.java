@@ -121,7 +121,16 @@ public class ServerCommunication {
                 System.out.println("NEWOPPONENT");
             } else if(line.startsWith("STARTGAME")) {
                 // STARTGAMEside name timecontrolMin timecontrolSec gameID
-                cb = new ChessBoard();
+                cf.getChessPanel().resetChessBoard();
+                cb = cf.getChessPanel().getChessBoard();
+                cb.addActionListener((ActionEvent e) -> {
+                    String message = e.getActionCommand();
+                    if(message.startsWith("MOVE") || message.startsWith("PROMOTE")) {
+                        out.println(e.getActionCommand());
+                        System.out.println(e.getActionCommand());
+                        if(tc != null) tc.hit();
+                    }
+                });
                 String[] data = line.substring(9).split(" ");
                 cb.setPerspective(Boolean.parseBoolean(data[0]));
                 // data[1] will be other person's name: will be used later

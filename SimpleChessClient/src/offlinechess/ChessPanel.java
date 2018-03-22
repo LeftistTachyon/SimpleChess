@@ -150,4 +150,11 @@ public class ChessPanel extends JPanel {
     public ChessBoard getChessBoard() {
         return cb;
     }
+    
+    /**
+     * Resets the chess board
+     */
+    public void resetChessBoard() {
+        cb = new ChessBoard();
+    }
 }
