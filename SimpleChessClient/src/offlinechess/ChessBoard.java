@@ -1308,7 +1308,7 @@ public class ChessBoard {
      */
     public void enableDragging(String fromWhere) {
         if(!isEmptySquare(fromWhere)) 
-            if(getPiece(fromWhere).isWhite == playerIsWhite 
+            if(promotion == -1 && getPiece(fromWhere).isWhite == playerIsWhite 
                     && playerIsWhite == fromPerspective) 
                 draggingFrom = fromWhere;
             else
