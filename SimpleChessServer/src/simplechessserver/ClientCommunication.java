@@ -238,6 +238,8 @@ public class ClientCommunication {
                         opponent.println(message);
                         out.println(message);
                         println(message);
+                        opponent.cb = new ChessBoard();
+                        cb = new ChessBoard();
                     }
                 }
             } catch (IOException e) {
