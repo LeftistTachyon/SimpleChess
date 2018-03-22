@@ -121,6 +121,7 @@ public class ServerCommunication {
                 System.out.println("NEWOPPONENT");
             } else if(line.startsWith("STARTGAME")) {
                 // STARTGAMEside name timecontrolMin timecontrolSec gameID
+                cb = new ChessBoard();
                 String[] data = line.substring(9).split(" ");
                 cb.setPerspective(Boolean.parseBoolean(data[0]));
                 // data[1] will be other person's name: will be used later

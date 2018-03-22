@@ -850,6 +850,7 @@ public class ChessBoard {
         if(playerIsWhite == fromPerspective) 
             notifyListeners("MOVE" + lastMoveFrom + " " + lastMoveTo);
         playerIsWhite = !playerIsWhite;
+        resetKingPos();
         recalculateMoves();
         updatePos(miniFEN());
         mr.moved(thisCopy, this, ChessBoard.toSquare(fromWhereX, fromWhereY), ChessBoard.toSquare(toWhereX, toWhereY));
