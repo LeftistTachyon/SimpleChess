@@ -148,6 +148,7 @@ public class ClientCommunication {
                         return;
                     }
                     // handle input
+                    String message = null;
                     if(line.startsWith("NEWOPPONENT")) {
                         if(unmatched.contains(this)) continue;
                         unmatched.add(this);
@@ -195,26 +196,16 @@ public class ClientCommunication {
                         opponent.println(line);
                     } else if(line.startsWith("TIMEOUT") && opponentID != -1) {
                         boolean who = Boolean.parseBoolean(line.substring(7));
-                        String message = "ENDGAME";
+                        message = "ENDGAME";
                         if((side == 1 && who) || (side == -1 && !who)) {
                             message += "-1";
                         } else {
                             message += "1";
                         }
                         message += " timed_out";
-                        Handler opponent = matchedHandlers.get(opponentID);
-                        out.println(message);
-                        println(message);
-                        opponentName = null;
-                        opponentID = -1;
-                        opponent.out.println(message);
-                        opponent.println(message);
-                        opponent.opponentName = null;
-                        opponent.opponentID = -1;
                     } else if(line.startsWith("PING")) {
                         out.println("PING");
                     }
-                    String message = null;
                     if(cb.insufficientMaterial()){
                         message = "ENDGAME0 insufficient_material";
                     } else if(cb.is50MoveDraw()) {
@@ -238,8 +229,8 @@ public class ClientCommunication {
                         opponent.println(message);
                         out.println(message);
                         println(message);
-                        opponent.cb = new ChessBoard();
-                        cb = new ChessBoard();
+                        opponent.reset();
+                        reset();
                     }
                 }
             } catch (IOException e) {
@@ -287,7 +278,9 @@ public class ClientCommunication {
          * Resets the variables to default values
          */
         public void reset() {
-            
+            opponentName = null;
+            opponentID = -1;
+            cb = new ChessBoard();
         }
     }
 }
