@@ -598,15 +598,15 @@ public class ChessBoard {
      * @param g2D the Graphics2D to draw on
      */
     private void drawDraggedPiece(Graphics2D g2D) {
-        if(draggingFrom != null) {
-            int midX = lastPoint.x - (SQUARE_SIZE / 2),
-                    midY = lastPoint.y - (SQUARE_SIZE / 2);
-            getPiece(draggingFrom).draw(g2D, midX, midY, 50, 50);
-        }
         if(fakeDraggingFrom != null) {
             int midX = lastPoint.x - (SQUARE_SIZE / 2),
                     midY = lastPoint.y - (SQUARE_SIZE / 2);
             getPiece(fakeDraggingFrom).draw(g2D, midX, midY, 50, 50);
+        }
+        if(draggingFrom != null) {
+            int midX = lastPoint.x - (SQUARE_SIZE / 2),
+                    midY = lastPoint.y - (SQUARE_SIZE / 2);
+            getPiece(draggingFrom).draw(g2D, midX, midY, 50, 50);
         }
     }
     
