@@ -282,5 +282,12 @@ public class ClientCommunication {
         public int compareTo(Handler h) {
             return name.compareTo(h.name);
         }
+        
+        /**
+         * Resets the variables to default values
+         */
+        public void reset() {
+            
+        }
     }
 }
