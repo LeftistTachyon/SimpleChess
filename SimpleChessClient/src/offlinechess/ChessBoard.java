@@ -118,6 +118,11 @@ public class ChessBoard {
     private ArrayList<ActionListener> listeners;
     
     /**
+     * Whether moves are allowed to be made
+     */
+    private boolean locked = false;
+    
+    /**
      * The size of the individual chess squares
      */
     public static final int SQUARE_SIZE = 64; // change to 64 soon
@@ -1221,6 +1226,7 @@ public class ChessBoard {
      * @param square where the board has been clicked
      */
     public void clicked(String square) {
+        if(locked) return;
         if(selected == null && promotion == -1) {
             if(!isEmptySquare(square) && (getPiece(square).isWhite == playerIsWhite && playerIsWhite == fromPerspective)) {
                 selected = square;
@@ -1310,7 +1316,7 @@ public class ChessBoard {
     public void enableDragging(String fromWhere) {
         if(!isEmptySquare(fromWhere)) 
             if(promotion == -1 && getPiece(fromWhere).isWhite == playerIsWhite 
-                    && playerIsWhite == fromPerspective) 
+                    && playerIsWhite == fromPerspective && !locked) 
                 draggingFrom = fromWhere;
             else
                 fakeDraggingFrom = fromWhere;
@@ -1527,5 +1533,19 @@ public class ChessBoard {
             output += "/";
         }
         return output;
+    }
+    
+    /**
+     * Locks this ChessBoard, thus prohibiting moves to be made.
+     */
+    public void lock() {
+        locked = true;
+    }
+    
+    /**
+     * Unlocks this ChessBoard, thus allowing moves to be made.
+     */
+    public void unlock() {
+        locked = false;
     }
 }

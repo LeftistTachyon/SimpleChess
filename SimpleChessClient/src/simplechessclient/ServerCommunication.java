@@ -57,6 +57,7 @@ public class ServerCommunication {
                 if(tc != null) tc.hit();
             }
         });
+        cb.lock();
         run();
     }
     
@@ -86,14 +87,8 @@ public class ServerCommunication {
         Socket socket;
         try {
             socket = new Socket(serverAddress, 9001);
-        } catch(ConnectException cexp) {
-            JOptionPane.showMessageDialog(cf, cexp.getMessage(), 
-                    "Connection Error", JOptionPane.ERROR_MESSAGE);
-            cf.dispose();
-            System.exit(0);
-            return;
-        } catch(UnknownHostException uhe) {
-            JOptionPane.showMessageDialog(cf, uhe.getMessage(), 
+        } catch(ConnectException | UnknownHostException ex) {
+            JOptionPane.showMessageDialog(cf, ex.getMessage(), 
                     "Connection Error", JOptionPane.ERROR_MESSAGE);
             cf.dispose();
             System.exit(0);
@@ -145,6 +140,7 @@ public class ServerCommunication {
                 // ENDGAMEresult why
                 String[] data = line.substring(7).split(" ");
                 notifyResult(data[0], data[1]);
+                cb.lock();
                 out.println("NEWOPPONENT");
                 System.out.println("NEWOPPONENT");
             } else if(line.startsWith("MOVE")) {
