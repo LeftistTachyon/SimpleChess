@@ -258,6 +258,7 @@ public class ChessBoard {
             System.arraycopy(cb.board[i], 0, board[i], 0, cb.board[i].length);
         }
         this.enPassant = cb.enPassant;
+        this.kingPos = new HashMap<>(cb.kingPos);
     }
     
     /**
@@ -854,6 +855,7 @@ public class ChessBoard {
         lastMoveTo = toSquare(toWhereX, toWhereY);
         if(playerIsWhite == fromPerspective) 
             notifyListeners("MOVE" + lastMoveFrom + " " + lastMoveTo);
+        System.out.println("kingAt: " + playerIsWhite + " " + kingAt);
         playerIsWhite = !playerIsWhite;
         resetKingPos();
         recalculateMoves();
