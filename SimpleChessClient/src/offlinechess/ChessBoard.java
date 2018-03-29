@@ -855,7 +855,6 @@ public class ChessBoard {
         lastMoveTo = toSquare(toWhereX, toWhereY);
         if(playerIsWhite == fromPerspective) 
             notifyListeners("MOVE" + lastMoveFrom + " " + lastMoveTo);
-        System.out.println("kingAt: " + playerIsWhite + " " + kingAt);
         playerIsWhite = !playerIsWhite;
         resetKingPos();
         recalculateMoves();
@@ -1322,7 +1321,7 @@ public class ChessBoard {
                 draggingFrom = fromWhere;
             else
                 fakeDraggingFrom = fromWhere;
-        System.out.println("selected: " + selected);
+        System.out.println("selected: " + draggingFrom);
     }
     
     /**
@@ -1334,19 +1333,23 @@ public class ChessBoard {
             return;
         }
         if(draggingFrom == null) return;
-        String dropSquare = toPerspectiveSquare((lastPoint.x-x)/SQUARE_SIZE, (lastPoint.y-y)/SQUARE_SIZE);
-        /*if(getPiece(draggingFrom).isLegalMove(this, draggingFrom, dropSquare)) {
-            movePiece(draggingFrom, dropSquare);
-        }*/
-        if(getPiece(draggingFrom).isLegalMove(this, draggingFrom, dropSquare)) {
-            if(getPiece(draggingFrom).getCharRepresentation().equals("P") && (ChessBoard.getRow(dropSquare) == 0 || ChessBoard.getRow(dropSquare) == 7)) {
-                promotion = ChessBoard.getColumn(dropSquare);
-                promotingFrom = draggingFrom;
-            } else {
+        if(!locked) {
+            String dropSquare = toPerspectiveSquare((lastPoint.x - x) / SQUARE_SIZE, (lastPoint.y - y) / SQUARE_SIZE);
+            /*if(getPiece(draggingFrom).isLegalMove(this, draggingFrom, dropSquare)) {
                 movePiece(draggingFrom, dropSquare);
+            }*/
+            if (getPiece(draggingFrom).isLegalMove(this, draggingFrom, dropSquare)) {
+                if (getPiece(draggingFrom).getCharRepresentation().equals("P") && (ChessBoard.getRow(dropSquare) == 0 || ChessBoard.getRow(dropSquare) == 7)) {
+                    promotion = ChessBoard.getColumn(dropSquare);
+                    promotingFrom = draggingFrom;
+                } else {
+                    movePiece(draggingFrom, dropSquare);
+                }
+            }
+            if (!draggingFrom.equals(selected)) {
+                selected = null;
             }
         }
-        if(!draggingFrom.equals(selected)) selected = null;
         draggingFrom = null;
     }
 

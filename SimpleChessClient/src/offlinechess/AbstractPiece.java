@@ -68,20 +68,19 @@ public abstract class AbstractPiece {
         LinkedList<String> output = new LinkedList<>();
         AbstractPiece[][] initLayout = new AbstractPiece[cb.getBoard().length][cb.getBoard()[0].length];
         for(int i = 0; i < cb.getBoard().length; i++) {
-            for(int j = 0; j < cb.getBoard()[i].length; j++) {
-                initLayout[i][j] = cb.getBoard()[i][j];
-            }
+            System.arraycopy(cb.getBoard()[i], 0, initLayout[i], 0, cb.getBoard()[i].length);
         }
         for(String square:allLegal) {
             cb.maybeMove(currentPosition, square);
+            if(getCharRepresentation().equals("K")) cb.resetKingPos(isWhite);
             if(getCharRepresentation().equals("P") && 
                     (ChessBoard.getRow(square) == 0 
                     || ChessBoard.getRow(square) == 7)) 
                 cb.placePiece(new Queen(isWhite), square);
             if(!cb.inCheck(isWhite)) output.add(square);
             cb.setBoard(initLayout);
-            if(getCharRepresentation().equals("K")) cb.resetKingPos(isWhite);
         }
+        cb.resetKingPos(isWhite);
         return output;
     }
     

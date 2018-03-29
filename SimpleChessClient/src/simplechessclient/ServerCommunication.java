@@ -1,6 +1,8 @@
 package simplechessclient;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -114,8 +116,6 @@ public class ServerCommunication {
                 cf.start();
                 out.println("NEWOPPONENT");
                 System.out.println("NEWOPPONENT");
-            } else if(line.startsWith("STARTGAME")) {
-                // STARTGAMEside name timecontrolMin timecontrolSec gameID
                 cf.getChessPanel().resetChessBoard();
                 cb = cf.getChessPanel().getChessBoard();
                 cb.addActionListener((ActionEvent e) -> {
@@ -126,6 +126,11 @@ public class ServerCommunication {
                         if(tc != null) tc.hit();
                     }
                 });
+                cb.lock();
+            } else if(line.startsWith("STARTGAME")) {
+                cb.recalculateMoves();
+                cb.unlock();
+                // STARTGAMEside name timecontrolMin timecontrolSec gameID
                 String[] data = line.substring(9).split(" ");
                 cb.setPerspective(Boolean.parseBoolean(data[0]));
                 // data[1] will be other person's name: will be used later
@@ -140,6 +145,16 @@ public class ServerCommunication {
                 // ENDGAMEresult why
                 String[] data = line.substring(7).split(" ");
                 notifyResult(data[0], data[1]);
+                cf.getChessPanel().resetChessBoard();
+                cb = cf.getChessPanel().getChessBoard();
+                cb.addActionListener((ActionEvent e) -> {
+                    String message = e.getActionCommand();
+                    if(message.startsWith("MOVE") || message.startsWith("PROMOTE")) {
+                        out.println(e.getActionCommand());
+                        System.out.println(e.getActionCommand());
+                        if(tc != null) tc.hit();
+                    }
+                });
                 cb.lock();
                 out.println("NEWOPPONENT");
                 System.out.println("NEWOPPONENT");

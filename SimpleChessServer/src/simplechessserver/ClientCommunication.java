@@ -178,6 +178,8 @@ public class ClientCommunication {
                                     two.println("STARTGAMEtrue " + one.name + " 1 0");
                                     two.side = 1;
                                 }
+                                one.cb.recalculateMoves();
+                                two.cb.recalculateMoves();
                             }
                         }
                     } else if(line.startsWith("MOVE") && opponentID != -1) {
@@ -220,8 +222,6 @@ public class ClientCommunication {
                         message = "ENDGAME-1 checkmate";
                     } else if(cb.checkMated(false)) {
                         message = "ENDGAME1 checkmate";
-                    } else if(!names.contains(opponentName)) {
-                        message = "ENDGAME" + side + " resignation";
                     }
                     if(message != null && opponentID != -1) {
                         Handler opponent = matchedHandlers.get(opponentID);
@@ -238,6 +238,13 @@ public class ClientCommunication {
             } finally {
                 // This client is going down!  Remove its name and its print
                 // writer from the sets, and close its socket.
+                String message = "ENDGAME" + -side + " resignation";
+                Handler opponent = matchedHandlers.get(opponentID);
+                if(opponent != null) {
+                    opponent.out.println(message);
+                    opponent.println(message);
+                    opponent.reset();
+                }
                 if(name != null) {
                     names.remove(name);
                 }
@@ -249,7 +256,9 @@ public class ClientCommunication {
                     Collections.sort(temp);
                     matchedHandlers.remove(Collections.binarySearch(temp, this));
                 }
+                out.close();
                 try {
+                    in.close();
                     socket.close();
                 } catch (IOException e) {
                 }
@@ -279,6 +288,7 @@ public class ClientCommunication {
          */
         public void reset() {
             opponentName = null;
+            matchedHandlers.remove(opponentID);
             opponentID = -1;
             cb = new ChessBoard();
         }
