@@ -70,9 +70,14 @@ public class ClientCommunication {
         private PrintWriter out;
         
         /**
-         * This intance's chess board
+         * This instance's chess board.
          */
         private ChessBoard cb;
+        
+        /**
+         * This instance's time control.
+         */
+        private TimeControl tc;
         
         /**
          * The opponent's ID
@@ -162,22 +167,26 @@ public class ClientCommunication {
                                 two.opponentID = iD;
                                 one.opponentName = two.name;
                                 two.opponentName = one.name;
-                                // STARTGAMEside name timecontrolMin timecontrolSec gameID
+                                // STARTGAMEside name
+                                one.tc = new TimeControl();
+                                two.tc = new TimeControl();
                                 if(Math.random() < 0.5) {
-                                    one.out.println("STARTGAMEtrue " + two.name + " 1 0");
-                                    one.println("STARTGAMEtrue " + two.name + " 1 0");
+                                    one.out.println("STARTGAMEtrue " + two.name);
+                                    one.println("STARTGAMEtrue " + two.name);
                                     one.side = 1;
-                                    two.out.println("STARTGAMEfalse " + one.name + " 1 0");
-                                    two.println("STARTGAMEfalse " + one.name + " 1 0");
+                                    two.out.println("STARTGAMEfalse " + one.name);
+                                    two.println("STARTGAMEfalse " + one.name);
                                     two.side = -1;
                                 } else {
-                                    one.out.println("STARTGAMEfalse " + two.name + " 1 0");
-                                    one.println("STARTGAMEfalse " + two.name + " 1 0");
+                                    one.out.println("STARTGAMEfalse " + two.name);
+                                    one.println("STARTGAMEfalse " + two.name);
                                     one.side = -1;
-                                    two.out.println("STARTGAMEtrue " + one.name + " 1 0");
-                                    two.println("STARTGAMEtrue " + one.name + " 1 0");
+                                    two.out.println("STARTGAMEtrue " + one.name);
+                                    two.println("STARTGAMEtrue " + one.name);
                                     two.side = 1;
                                 }
+                                one.tc.start();
+                                two.tc.start();
                                 one.cb.recalculateMoves();
                                 two.cb.recalculateMoves();
                             }
@@ -186,6 +195,8 @@ public class ClientCommunication {
                         String[] data = line.substring(4).split(" ");
                         cb.movePiece(data[0], data[1]);
                         Handler opponent = matchedHandlers.get(opponentID);
+                        tc.hit();
+                        opponent.tc.hit();
                         opponent.cb.movePiece(data[0], data[1]);
                         opponent.out.println(line);
                         opponent.println(line);
@@ -193,6 +204,8 @@ public class ClientCommunication {
                         String[] data = line.substring(7).split(" ");
                         cb.promotePiece(data[0], data[1], Integer.parseInt(data[2]));
                         Handler opponent = matchedHandlers.get(opponentID);
+                        tc.hit();
+                        opponent.tc.hit();
                         opponent.cb.promotePiece(data[0], data[1], Integer.parseInt(data[2]));
                         opponent.out.println(line);
                         opponent.println(line);
@@ -287,6 +300,7 @@ public class ClientCommunication {
          * Resets the variables to default values
          */
         public void reset() {
+            tc.stop();
             opponentName = null;
             matchedHandlers.remove(opponentID);
             opponentID = -1;
