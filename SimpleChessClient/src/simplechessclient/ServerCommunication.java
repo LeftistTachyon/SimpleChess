@@ -1,8 +1,6 @@
 package simplechessclient;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -10,6 +8,7 @@ import java.io.PrintWriter;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import offlinechess.ChessBoard;
 import offlinechess.ChessFrame;
@@ -102,6 +101,8 @@ public class ServerCommunication {
 
         // Process all messages from server, according to the protocol.
         
+        JFrame timeFrame = null;
+        
         while(true) {
             String line = in.readLine();
             if(line == null) {
@@ -130,17 +131,15 @@ public class ServerCommunication {
             } else if(line.startsWith("STARTGAME")) {
                 cb.recalculateMoves();
                 cb.unlock();
-                // STARTGAMEside name timecontrolMin timecontrolSec gameID
+                // STARTGAMEside name /*timecontrolMin timecontrolSec*/ gameID
                 String[] data = line.substring(9).split(" ");
                 cb.setPerspective(Boolean.parseBoolean(data[0]));
                 // data[1] will be other person's name: will be used later
-                tc = new TimeControl(Integer.parseInt(data[2]) * 60, Integer.parseInt(data[3]));
+                tc = new TimeControl();
+                GameWindows.showTimeWindow(tc.timeStringProperty());
                 tc.start();
-                tc.addActionListener((ActionEvent e) -> {
-                    out.println(e.getActionCommand());
-                    System.out.println(e.getActionCommand());
-                });
             } else if(line.startsWith("ENDGAME")) {
+                if(timeFrame != null) timeFrame.dispose();
                 tc.stop();
                 // ENDGAMEresult why
                 String[] data = line.substring(7).split(" ");

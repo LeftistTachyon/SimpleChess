@@ -3,6 +3,8 @@ package simplechessclient;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 
 /**
  * Time control for chess
@@ -45,6 +47,11 @@ public class TimeControl implements Runnable {
     private ArrayList<ActionListener> listeners;
     
     /**
+     * A StringProperty containing the times
+     */
+    private StringProperty timeString;
+    
+    /**
      * A new Time Control: start + add
      * @param start the starting amount of seconds
      * @param add the increment
@@ -55,6 +62,13 @@ public class TimeControl implements Runnable {
         increment = add;
         whiteTime = startingSeconds; 
         blackTime = startingSeconds;
+    }
+    
+    /**
+     * Creates a default TimeControl instance with (1+0).
+     */
+    public TimeControl() {
+        this(1, 0);
     }
     
     /**
@@ -124,7 +138,16 @@ public class TimeControl implements Runnable {
      */
     @Override
     public String toString() {
-        return toString(true) + "|" + toString(false);
+        timeString = new SimpleStringProperty(toString(true) + "|" + toString(false));
+        return timeString.get();
+    }
+    
+    /**
+     * Returns this instance's timeString property
+     * @return this instance's timeString property
+     */
+    public StringProperty timeStringProperty() {
+        return timeString;
     }
     
     /**
