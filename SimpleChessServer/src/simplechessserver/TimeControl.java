@@ -32,7 +32,7 @@ public class TimeControl implements Runnable {
     /**
      * Whose turn it is
      */
-    private boolean turn = true;
+    private boolean turn;
     
     /**
      * Whether the clock is in a game
@@ -61,7 +61,7 @@ public class TimeControl implements Runnable {
      * Creates a default TimeControl instance with (1+0).
      */
     public TimeControl() {
-        this(1, 0);
+        this(60, 0);
     }
     
     /**
@@ -81,6 +81,7 @@ public class TimeControl implements Runnable {
      */
     public void start() {
         inGame = true;
+        turn = true;
         new Thread(this).start();
     }
     
@@ -98,23 +99,22 @@ public class TimeControl implements Runnable {
     public void run() {
         while(inGame) {
             if(turn) {
-                whiteTime -= 0.01;
+                whiteTime -= 0.1;
                 if(whiteTime == 0) {
                     notifyListeners("TIMEOUTtrue");
                 }
             } else {
-                blackTime -= 0.01;
+                blackTime -= 0.1;
                 if(blackTime == 0) {
                     notifyListeners("TIMEOUTfalse");
                 }
             }
             try {
-                Thread.sleep(10);
+                Thread.sleep(100);
             } catch (InterruptedException ex) {
                 System.out.println("Interrupted: " + ex.toString());
                 return;
             }
-            System.out.println("XD");
         }
     }
     
@@ -144,14 +144,14 @@ public class TimeControl implements Runnable {
         double time = (whichSide)?whiteTime:blackTime;
         if(time <= 0) {
             return "0:00.00";
-        } else if(time <= 10) {
-            return String.format("0:%.2f", time);
         } else if(time <= 20) {
             return String.format("0:%.1f", time);
         } else if(time < 3600) {
-            return (time / 60) + ":" + (time % 60);
+            // return (int)(time / 60) + ":" + (int)(time % 60);
+            return String.format("%d:%02d", (int)(time / 60), (int)(time % 60));
         } else {
-            return (time / 3600) + ":" + ((time / 60) % 60);
+            // return (int)(time / 3600) + ":" + (int)((time / 60) % 60);
+            return String.format("%d:%02d", (int)(time / 3600), (int)((time / 60) % 60));
         }
     }
     
