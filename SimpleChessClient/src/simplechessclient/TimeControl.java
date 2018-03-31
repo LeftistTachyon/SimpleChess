@@ -3,8 +3,11 @@ package simplechessclient;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.beans.value.ChangeListener;
 
 /**
  * Time control for chess
@@ -24,17 +27,17 @@ public class TimeControl implements Runnable {
     /**
      * The amount of time white has
      */
-    private double whiteTime;
+    private DoubleProperty whiteTime;
     
     /**
      * The amount of time black has
      */
-    private double blackTime;
+    private DoubleProperty blackTime;
     
     /**
      * Whose turn it is
      */
-    private boolean turn = true;
+    private boolean turn;
     
     /**
      * Whether the clock is in a game
@@ -44,12 +47,12 @@ public class TimeControl implements Runnable {
     /**
      * The action listeners for moves and promotions
      */
-    private ArrayList<ActionListener> listeners;
+    private ArrayList<ActionListener> actionListeners;
     
     /**
-     * A StringProperty containing the times
+     * The change listeners for times
      */
-    private StringProperty timeString;
+    private ArrayList<ChangeListener> changeListeners;
     
     /**
      * A new Time Control: start + add
@@ -57,18 +60,19 @@ public class TimeControl implements Runnable {
      * @param add the increment
      */
     public TimeControl(int start, int add) {
-        listeners = new ArrayList<>();
+        actionListeners = new ArrayList<>();
+        changeListeners = new ArrayList<>();
         startingSeconds = start;
         increment = add;
-        whiteTime = startingSeconds; 
-        blackTime = startingSeconds;
+        whiteTime = new SimpleDoubleProperty(startingSeconds); 
+        blackTime = new SimpleDoubleProperty(startingSeconds);
     }
     
     /**
      * Creates a default TimeControl instance with (1+0).
      */
     public TimeControl() {
-        this(1, 0);
+        this(60, 0);
     }
     
     /**
@@ -76,9 +80,11 @@ public class TimeControl implements Runnable {
      */
     public void hit() {
         if(turn) {
-            whiteTime += increment;
+            // whiteTime += increment;
+            whiteTime.set(whiteTime.get() + increment);
         } else {
-            blackTime += increment;
+            // blackTime += increment;
+            blackTime.set(blackTime.get() + increment);
         }
         turn = !turn;
     }
@@ -88,6 +94,7 @@ public class TimeControl implements Runnable {
      */
     public void start() {
         inGame = true;
+        turn = true;
         new Thread(this).start();
     }
     
@@ -105,18 +112,32 @@ public class TimeControl implements Runnable {
     public void run() {
         while(inGame) {
             if(turn) {
-                whiteTime -= 0.01;
-                if(whiteTime == 0) {
-                    notifyListeners("TIMEOUTtrue");
+                // whiteTime -= 0.1;
+                if(whiteTime.get() > 0) {
+                    whiteTime.set(whiteTime.get() - 0.1);
+                    notifyChangeListeners(true);
+                }
+                if(whiteTime.get() == 0) {
+                    notifyActionListeners("TIMEOUTtrue");
                 }
             } else {
-                blackTime -= 0.01;
-                if(blackTime == 0) {
-                    notifyListeners("TIMEOUTfalse");
+                // blackTime -= 0.1;
+                if(blackTime.get() > 0) {
+                    blackTime.set(blackTime.get() - 0.1);
+                    notifyChangeListeners(false);
+                }
+                if(blackTime.get() == 0) {
+                    notifyActionListeners("TIMEOUTfalse");
                 }
             }
+            if(turn && whiteTime.get()%1 == 0.0) {
+                System.out.println("White time: " + whiteTime);
+            }
+            if(!turn && blackTime.get()%1 == 0.0) {
+                System.out.println("Black time: " + blackTime);
+            }
             try {
-                Thread.sleep(10);
+                Thread.sleep(100);
             } catch (InterruptedException ex) {
                 System.out.println("Interrupted: " + ex.toString());
                 return;
@@ -128,8 +149,8 @@ public class TimeControl implements Runnable {
      * Resets the clock
      */
     public void reset() {
-        whiteTime = startingSeconds;
-        blackTime = startingSeconds;
+        whiteTime = new SimpleDoubleProperty(startingSeconds);
+        blackTime = new SimpleDoubleProperty(startingSeconds);
     }
 
     /**
@@ -138,16 +159,7 @@ public class TimeControl implements Runnable {
      */
     @Override
     public String toString() {
-        timeString = new SimpleStringProperty(toString(true) + "|" + toString(false));
-        return timeString.get();
-    }
-    
-    /**
-     * Returns this instance's timeString property
-     * @return this instance's timeString property
-     */
-    public StringProperty timeStringProperty() {
-        return timeString;
+        return toString(true) + "|" + toString(false);
     }
     
     /**
@@ -156,17 +168,17 @@ public class TimeControl implements Runnable {
      * @return a String representation of their current time state
      */
     public String toString(boolean whichSide) {
-        double time = (whichSide)?whiteTime:blackTime;
+        double time = (whichSide)?whiteTime.get():blackTime.get();
         if(time <= 0) {
             return "0:00.00";
-        } else if(time <= 10) {
-            return String.format("0:%.2f", time);
         } else if(time <= 20) {
             return String.format("0:%.1f", time);
         } else if(time < 3600) {
-            return (time / 60) + ":" + (time % 60);
+            // return (int)(time / 60) + ":" + (int)(time % 60);
+            return String.format("%d:%02d", (int)(time / 60), (int)(time % 60));
         } else {
-            return (time / 3600) + ":" + ((time / 60) % 60);
+            // return (int)(time / 3600) + ":" + (int)((time / 60) % 60);
+            return String.format("%d:%02d", (int)(time / 3600), (int)((time / 60) % 60));
         }
     }
     
@@ -174,9 +186,19 @@ public class TimeControl implements Runnable {
      * Notifies all action listeners listening to this object
      * @param message the message to give to all of the listeners
      */
-    private void notifyListeners(String message) {
-        for(ActionListener listener : listeners) {
+    private void notifyActionListeners(String message) {
+        for(ActionListener listener : actionListeners) {
             listener.actionPerformed(new ActionEvent(this, 0, message));
+        }
+    }
+    
+    /**
+     * Notifies all change listeners listening to this object
+     */
+    private void notifyChangeListeners(boolean white) {
+        double after = ((white)?whiteTime:blackTime).get();
+        for(ChangeListener changeListener : changeListeners) {
+            changeListener.changed((white)?whiteTime:blackTime, after - 0.1, after);
         }
     }
     
@@ -185,6 +207,14 @@ public class TimeControl implements Runnable {
      * @param al the one to add
      */
     public void addActionListener(ActionListener al) {
-        listeners.add(al);
+        actionListeners.add(al);
+    }
+    
+    /**
+     * Adds a change listener
+     * @param cl the one to add
+     */
+    public void addChangeListener(ChangeListener cl) {
+        changeListeners.add(cl);
     }
 }

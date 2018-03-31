@@ -48,18 +48,22 @@ public class ServerCommunication {
      * @throws java.io.IOException if something goes wrong
      */
     public ServerCommunication() throws IOException {
-        cf = new ChessFrame();
-        cb = cf.getChessPanel().getChessBoard();
-        cb.addActionListener((ActionEvent e) -> {
-            String message = e.getActionCommand();
-            if(message.startsWith("MOVE") || message.startsWith("PROMOTE")) {
-                out.println(e.getActionCommand());
-                System.out.println(e.getActionCommand());
-                if(tc != null) tc.hit();
-            }
-        });
-        cb.lock();
-        run();
+        try {
+            cf = new ChessFrame();
+            cb = cf.getChessPanel().getChessBoard();
+            cb.addActionListener((ActionEvent e) -> {
+                String message = e.getActionCommand();
+                if (message.startsWith("MOVE") || message.startsWith("PROMOTE")) {
+                    out.println(e.getActionCommand());
+                    System.out.println(e.getActionCommand());
+                    if (tc != null) {
+                        tc.hit();
+                    }
+                }
+            });
+            cb.lock();
+            run();
+        } catch (IllegalStateException ise) {}
     }
     
     /**
@@ -136,7 +140,7 @@ public class ServerCommunication {
                 cb.setPerspective(Boolean.parseBoolean(data[0]));
                 // data[1] will be other person's name: will be used later
                 tc = new TimeControl();
-                GameWindows.showTimeWindow(tc.timeStringProperty());
+                GameWindows.showTimeWindow(tc);
                 tc.start();
             } else if(line.startsWith("ENDGAME")) {
                 if(timeFrame != null) timeFrame.dispose();
