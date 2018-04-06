@@ -8,6 +8,9 @@ import java.io.PrintWriter;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import offlinechess.ChessBoard;
@@ -106,6 +109,7 @@ public class ServerCommunication {
         // Process all messages from server, according to the protocol.
         
         JFrame timeFrame = null;
+        ScheduledExecutorService service = null;
         
         while(true) {
             String line = in.readLine();
@@ -141,10 +145,11 @@ public class ServerCommunication {
                 // data[1] will be other person's name: will be used later
                 tc = new TimeControl();
                 GameWindows.showTimeWindow(tc);
-                tc.start();
+                service = Executors.newScheduledThreadPool(1);
+                service.scheduleAtFixedRate(tc, 0, 100, TimeUnit.MILLISECONDS);
             } else if(line.startsWith("ENDGAME")) {
                 if(timeFrame != null) timeFrame.dispose();
-                tc.stop();
+                if(service != null) service.shutdown();
                 // ENDGAMEresult why
                 String[] data = line.substring(7).split(" ");
                 notifyResult(data[0], data[1]);

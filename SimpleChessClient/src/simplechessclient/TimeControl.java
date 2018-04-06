@@ -5,8 +5,6 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
 
 /**
@@ -38,11 +36,6 @@ public class TimeControl implements Runnable {
      * Whose turn it is
      */
     private boolean turn;
-    
-    /**
-     * Whether the clock is in a game
-     */
-    private boolean inGame = false;
     
     /**
      * The action listeners for moves and promotions
@@ -93,16 +86,8 @@ public class TimeControl implements Runnable {
      * Starts the clock
      */
     public void start() {
-        inGame = true;
         turn = true;
         new Thread(this).start();
-    }
-    
-    /**
-     * Stops the clock
-     */
-    public void stop() {
-        inGame = false;
     }
     
     /**
@@ -110,38 +95,30 @@ public class TimeControl implements Runnable {
      */
     @Override
     public void run() {
-        while(inGame) {
-            if(turn) {
-                // whiteTime -= 0.1;
-                if(whiteTime.get() > 0) {
-                    whiteTime.set(whiteTime.get() - 0.1);
-                    notifyChangeListeners(true);
-                }
-                if(whiteTime.get() == 0) {
-                    notifyActionListeners("TIMEOUTtrue");
-                }
-            } else {
-                // blackTime -= 0.1;
-                if(blackTime.get() > 0) {
-                    blackTime.set(blackTime.get() - 0.1);
-                    notifyChangeListeners(false);
-                }
-                if(blackTime.get() == 0) {
-                    notifyActionListeners("TIMEOUTfalse");
-                }
+        if(turn) {
+            // whiteTime -= 0.1;
+            if(whiteTime.get() > 0) {
+                whiteTime.set(whiteTime.get() - 0.1);
+                notifyChangeListeners(true);
             }
-            if(turn && whiteTime.get()%1 == 0.0) {
-                System.out.println("White time: " + whiteTime);
+            if(whiteTime.get() == 0) {
+                notifyActionListeners("TIMEOUTtrue");
             }
-            if(!turn && blackTime.get()%1 == 0.0) {
-                System.out.println("Black time: " + blackTime);
+        } else {
+            // blackTime -= 0.1;
+            if(blackTime.get() > 0) {
+                blackTime.set(blackTime.get() - 0.1);
+                notifyChangeListeners(false);
             }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-                System.out.println("Interrupted: " + ex.toString());
-                return;
+            if(blackTime.get() == 0) {
+                notifyActionListeners("TIMEOUTfalse");
             }
+        }
+        if(turn && whiteTime.get()%1 == 0.0) {
+            System.out.println("White time: " + whiteTime);
+        }
+        if(!turn && blackTime.get()%1 == 0.0) {
+            System.out.println("Black time: " + blackTime);
         }
     }
     
