@@ -100,8 +100,7 @@ public class TimeControl implements Runnable {
             if(whiteTime.get() > 0) {
                 whiteTime.set(whiteTime.get() - 0.1);
                 notifyChangeListeners(true);
-            }
-            if(whiteTime.get() == 0) {
+            } else {
                 notifyActionListeners("TIMEOUTtrue");
             }
         } else {
@@ -109,8 +108,7 @@ public class TimeControl implements Runnable {
             if(blackTime.get() > 0) {
                 blackTime.set(blackTime.get() - 0.1);
                 notifyChangeListeners(false);
-            }
-            if(blackTime.get() == 0) {
+            } else {
                 notifyActionListeners("TIMEOUTfalse");
             }
         }
@@ -147,7 +145,7 @@ public class TimeControl implements Runnable {
     public String toString(boolean whichSide) {
         double time = (whichSide)?whiteTime.get():blackTime.get();
         if(time <= 0) {
-            return "0:00.00";
+            return "0:00.0";
         } else if(time <= 20) {
             return String.format("0:%.1f", time);
         } else if(time < 3600) {

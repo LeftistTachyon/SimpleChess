@@ -2,7 +2,7 @@ package simplechessclient;
 
 import java.awt.Component;
 import java.awt.Container;
-import javafx.beans.property.StringProperty;
+import java.awt.Dimension;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javax.swing.AbstractButton;
@@ -50,7 +50,7 @@ public class GameWindows {
             setResizable(false);
 
             jLabel.setFont(new java.awt.Font("Segoe UI", 0, 48)); // NOI18N
-            jLabel.setText(tc.toString());
+            jLabel.setText("0:00.0|0:00.0");
             jLabel.setToolTipText("");
 
             GroupLayout layout = new GroupLayout(getContentPane());
@@ -104,6 +104,7 @@ public class GameWindows {
         
         java.awt.EventQueue.invokeLater(() -> {
             removeMinMaxClose(frame);
+            frame.setPreferredSize(new Dimension(900,100));
             frame.setVisible(true);
         });
         
