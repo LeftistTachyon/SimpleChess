@@ -99,15 +99,11 @@ public class TimeControl implements Runnable {
     public void run() {
         while(inGame) {
             if(turn) {
-                whiteTime -= 0.1;
-                if(whiteTime == 0) {
-                    notifyListeners("TIMEOUTtrue");
-                }
+                if(whiteTime > 0) whiteTime -= 0.1;
+                else notifyListeners("TIMEOUTtrue");
             } else {
-                blackTime -= 0.1;
-                if(blackTime == 0) {
-                    notifyListeners("TIMEOUTfalse");
-                }
+                if(blackTime > 0) blackTime -= 0.1;
+                else notifyListeners("TIMEOUTfalse");
             }
             try {
                 Thread.sleep(100);

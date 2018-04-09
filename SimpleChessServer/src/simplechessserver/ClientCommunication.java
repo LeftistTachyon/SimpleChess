@@ -1,5 +1,7 @@
 package simplechessserver;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -170,6 +172,18 @@ public class ClientCommunication {
                                 // STARTGAMEside name
                                 one.tc = new TimeControl();
                                 two.tc = new TimeControl();
+                                one.tc.addActionListener((ActionEvent e) -> {
+                                    String message1 = e.getActionCommand();
+                                    boolean lost = Boolean.parseBoolean(message1.substring(7));
+                                    String sideWon = lost?"-1":"1";
+                                    one.endGame("ENDGAME" + sideWon + " time");
+                                });
+                                two.tc.addActionListener((ActionEvent e) -> {
+                                    String message1 = e.getActionCommand();
+                                    boolean lost = Boolean.parseBoolean(message1.substring(7));
+                                    String sideWon = lost?"-1":"1";
+                                    two.endGame("ENDGAME" + sideWon + " time");
+                                });
                                 if(Math.random() < 0.5) {
                                     one.out.println("STARTGAMEtrue " + two.name);
                                     one.println("STARTGAMEtrue " + two.name);
@@ -209,18 +223,10 @@ public class ClientCommunication {
                         opponent.cb.promotePiece(data[0], data[1], Integer.parseInt(data[2]));
                         opponent.out.println(line);
                         opponent.println(line);
-                    } else if(line.startsWith("TIMEOUT") && opponentID != -1) {
-                        boolean who = Boolean.parseBoolean(line.substring(7));
-                        message = "ENDGAME";
-                        if((side == 1 && who) || (side == -1 && !who)) {
-                            message += "-1";
-                        } else {
-                            message += "1";
-                        }
-                        message += " timed_out";
                     } else if(line.startsWith("PING")) {
                         out.println("PING");
                     }
+                    //message = "ENDGAME0 aborted"
                     if(cb.insufficientMaterial()){
                         message = "ENDGAME0 insufficient_material";
                     } else if(cb.is50MoveDraw()) {
@@ -237,13 +243,7 @@ public class ClientCommunication {
                         message = "ENDGAME1 checkmate";
                     }
                     if(message != null && opponentID != -1) {
-                        Handler opponent = matchedHandlers.get(opponentID);
-                        opponent.out.println(message);
-                        opponent.println(message);
-                        out.println(message);
-                        println(message);
-                        opponent.reset();
-                        reset();
+                        endGame(message);
                     }
                 }
             } catch (IOException e) {
@@ -294,6 +294,22 @@ public class ClientCommunication {
         @Override
         public int compareTo(Handler h) {
             return name.compareTo(h.name);
+        }
+        
+        /**
+         * Ends the current game and releases this client to play another game.
+         * @param message the message to broadcast to both players
+         */
+        public void endGame(String message) {
+            Handler opponent = matchedHandlers.get(opponentID);
+            if(opponent != null) {
+                opponent.out.println(message);
+                opponent.println(message);
+            }
+            out.println(message);
+            println(message);
+            if(opponent != null) opponent.reset();
+            reset();
         }
         
         /**
