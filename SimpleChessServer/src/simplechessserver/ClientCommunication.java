@@ -87,12 +87,6 @@ public class ClientCommunication {
         private int opponentID = -1;
         
         /**
-         * The opponent's name<br>
-         * Used to check whether the opponent's still there or not
-         */
-        private String opponentName = null;
-        
-        /**
          * Which side this client is on in a game
          */
         private int side = 0;
@@ -167,8 +161,6 @@ public class ClientCommunication {
                                 one.opponentID = iD + 1;
                                 matchedHandlers.put(iD+1, two);
                                 two.opponentID = iD;
-                                one.opponentName = two.name;
-                                two.opponentName = one.name;
                                 // STARTGAMEside name
                                 one.tc = new TimeControl();
                                 two.tc = new TimeControl();
@@ -256,7 +248,11 @@ public class ClientCommunication {
                 if(opponent != null) {
                     opponent.out.println(message);
                     opponent.println(message);
+                    opponent.tc.stop();
                     opponent.reset();
+                }
+                if(tc != null) {
+                    tc.stop();
                 }
                 if(name != null) {
                     names.remove(name);
@@ -317,7 +313,6 @@ public class ClientCommunication {
          */
         public void reset() {
             tc.stop();
-            opponentName = null;
             matchedHandlers.remove(opponentID);
             opponentID = -1;
             cb = new ChessBoard();
