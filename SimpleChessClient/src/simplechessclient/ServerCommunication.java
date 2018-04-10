@@ -1,7 +1,8 @@
 package simplechessclient;
 
+import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -9,9 +10,13 @@ import java.io.PrintWriter;
 import java.net.ConnectException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import offlinechess.ChessBoard;
@@ -92,25 +97,35 @@ public class ServerCommunication {
      */
     private void run() throws IOException {
         // Make connection and initialize streams
-        String serverAddress = getServerAddress();
-        Socket socket;
-        try {
-            socket = new Socket(serverAddress, 9001);
-        } catch(ConnectException | UnknownHostException ex) {
-            JOptionPane.showMessageDialog(cf, ex.getMessage(), 
-                    "Connection Error", JOptionPane.ERROR_MESSAGE);
-            cf.dispose();
-            System.exit(0);
-            return;
-        }
+        String serverAddress;
+        Socket socket = null;
+        do {
+            serverAddress = getServerAddress();
+            try {
+                socket = new Socket(serverAddress, 9001);
+            } catch (ConnectException | UnknownHostException ex) {
+                //JOptionPane.showMessageDialog(cf, ex.getMessage(),
+                //        "Connection Error", JOptionPane.ERROR_MESSAGE);
+                Object[] options = {"Reenter IP Adress", "Exit"};
+                int returned = JOptionPane.showOptionDialog(cf, ex.getMessage(), 
+                        "Connection Error", JOptionPane.OK_CANCEL_OPTION, 
+                        JOptionPane.ERROR_MESSAGE, null, options, options[0]);
+                if(returned == JOptionPane.CANCEL_OPTION || returned == JOptionPane.CLOSED_OPTION) {
+                    cf.dispose();
+                    System.exit(0);
+                    return;
+                }
+            }
+        } while(socket == null);
         in = new BufferedReader(new InputStreamReader(
             socket.getInputStream()));
         out = new PrintWriter(socket.getOutputStream(), true);
 
         // Process all messages from server, according to the protocol.
         
-        JFrame timeFrame = null;
+        LinkedList<JFrame> gameFrames = new LinkedList<>();
         ScheduledExecutorService service = null;
+        String _name = null;
         
         while(true) {
             String line = in.readLine();
@@ -118,12 +133,21 @@ public class ServerCommunication {
                 return;
             }
             if(line.startsWith("SUBMITNAME")) {
-                String _name = getName();
+                _name = getName();
                 out.println(_name);
                 System.out.println(_name);
             } else if(line.startsWith("NAMEACCEPTED")) {
                 // init stuff
                 cf.start();
+                try {
+                    Thread.sleep(7500);
+                } catch (InterruptedException ex) {
+                    JOptionPane.showMessageDialog(cf, ex.getMessage(), 
+                            "Thread Interrupted", JOptionPane.ERROR_MESSAGE);
+                    cf.dispose();
+                    System.exit(0);
+                    return;
+                }
                 out.println("NEWOPPONENT");
                 System.out.println("NEWOPPONENT");
                 cf.getChessPanel().resetChessBoard();
@@ -138,18 +162,37 @@ public class ServerCommunication {
                 });
                 cb.lock();
             } else if(line.startsWith("STARTGAME")) {
-                cb.recalculateMoves();
-                cb.unlock();
                 // STARTGAMEside name /*timecontrolMin timecontrolSec*/ gameID
                 String[] data = line.substring(9).split(" ");
-                cb.setPerspective(Boolean.parseBoolean(data[0]));
-                // data[1] will be other person's name: will be used later
+                
                 tc = new TimeControl();
-                GameWindows.showTimeWindow(tc);
                 service = Executors.newScheduledThreadPool(1);
                 service.scheduleAtFixedRate(tc, 0, 100, TimeUnit.MILLISECONDS);
+                
+                Point cfLocation = cf.getLocation();
+                JFrame tempFrame = GameWindows.showTimeWindow(tc);
+                tempFrame.setLocation(cfLocation.x + tempFrame.getWidth() / 2, 
+                        cfLocation.y + cf.getHeight() + 20);
+                gameFrames.add(tempFrame);
+                
+                cb.setPerspective(Boolean.parseBoolean(data[0]));
+                // data[1] will be other person's name
+                tempFrame = GameWindows.showNameWindow(_name, true);
+                tempFrame.setLocation(cfLocation.x - 20 - tempFrame.getWidth(), 
+                        cfLocation.y);
+                gameFrames.add(tempFrame);
+                tempFrame = GameWindows.showNameWindow(data[1], false);
+                tempFrame.setLocation(cfLocation.x - 20 - tempFrame.getWidth(), 
+                        cfLocation.y + cf.getHeight() - tempFrame.getHeight());
+                gameFrames.add(tempFrame);
+                cb.recalculateMoves();
+                cb.unlock();
             } else if(line.startsWith("ENDGAME")) {
-                if(timeFrame != null) timeFrame.dispose();
+                for(Iterator<JFrame> it = gameFrames.iterator(); it.hasNext();) {
+                    JFrame next = it.next();
+                    next.dispose();
+                }
+                gameFrames.removeAll(gameFrames);
                 if(service != null) service.shutdown();
                 // ENDGAMEresult why
                 String[] data = line.substring(7).split(" ");
