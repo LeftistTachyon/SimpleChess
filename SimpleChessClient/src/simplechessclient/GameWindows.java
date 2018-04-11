@@ -99,6 +99,7 @@ public class GameWindows {
         //</editor-fold>
         
         JFrame frame = new GameWindows.TimeWindow(tc);
+        frame.setSize(277, frame.getHeight());
         
         java.awt.EventQueue.invokeLater(() -> {
             frame.setVisible(true);
@@ -196,7 +197,7 @@ public class GameWindows {
         //</editor-fold>
         //</editor-fold>
         
-        NameWindow frame = new GameWindows.NameWindow(name, isYou);
+        JFrame frame = new GameWindows.NameWindow(name, isYou);
         if(frame.getWidth() < 220) {
             frame.setSize(220, frame.getHeight());
         }
