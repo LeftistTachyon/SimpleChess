@@ -124,9 +124,8 @@ public class ClientCommunication {
                     out.println("SUBMITNAME");
                     println("SUBMITNAME");
                     name = in.readLine();
-                    if(name == null) {
-                        return;
-                    }
+                    if(name == null) return;
+                    if("".equals(name) || "null".equals(name)) continue;
                     synchronized(names) {
                         if(!names.contains(name)) {
                             names.add(name);
