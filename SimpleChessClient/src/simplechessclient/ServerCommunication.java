@@ -239,11 +239,11 @@ public class ServerCommunication {
      * Prompt for and return the desired screen name.
      */
     private String getName() {
-        String s;
+        String s = null;
         do {
             s = JOptionPane.showInputDialog(
                 cf,
-                "Choose a screen name:",
+                "Choose a screen name (no spaces):",
                 "Screen name selection",
                 JOptionPane.PLAIN_MESSAGE);
             if(s == null) System.exit(0);
