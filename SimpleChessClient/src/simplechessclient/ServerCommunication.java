@@ -110,7 +110,7 @@ public class ServerCommunication {
                 int returned = JOptionPane.showOptionDialog(cf, ex.getMessage(), 
                         "Connection Error", JOptionPane.OK_CANCEL_OPTION, 
                         JOptionPane.ERROR_MESSAGE, null, options, options[0]);
-                if(returned == JOptionPane.CANCEL_OPTION || returned == JOptionPane.CLOSED_OPTION) {
+                if(returned != JOptionPane.OK_OPTION) {
                     cf.dispose();
                     System.exit(0);
                     return;
@@ -239,11 +239,16 @@ public class ServerCommunication {
      * Prompt for and return the desired screen name.
      */
     private String getName() {
-        return JOptionPane.showInputDialog(
-            cf,
-            "Choose a screen name:",
-            "Screen name selection",
-            JOptionPane.PLAIN_MESSAGE);
+        String s;
+        do {
+            s = JOptionPane.showInputDialog(
+                cf,
+                "Choose a screen name:",
+                "Screen name selection",
+                JOptionPane.PLAIN_MESSAGE);
+            if(s == null) System.exit(0);
+        } while(s.contains(" ") || "".equals(s));
+        return s;
     }
     
     /**
