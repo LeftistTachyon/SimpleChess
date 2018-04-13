@@ -1,6 +1,5 @@
 package simplechessclient;
 
-import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.io.BufferedReader;
@@ -15,8 +14,6 @@ import java.util.LinkedList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import offlinechess.ChessBoard;
@@ -140,7 +137,7 @@ public class ServerCommunication {
                 // init stuff
                 cf.start();
                 try {
-                    Thread.sleep(7500);
+                    Thread.sleep(3500);
                 } catch (InterruptedException ex) {
                     JOptionPane.showMessageDialog(cf, ex.getMessage(), 
                             "Thread Interrupted", JOptionPane.ERROR_MESSAGE);
@@ -169,21 +166,16 @@ public class ServerCommunication {
                 service = Executors.newScheduledThreadPool(1);
                 service.scheduleAtFixedRate(tc, 0, 100, TimeUnit.MILLISECONDS);
                 
-                Point cfLocation = cf.getLocation();
-                JFrame tempFrame = GameWindows.showTimeWindow(tc);
-                tempFrame.setLocation(cfLocation.x + tempFrame.getWidth() / 2, 
-                        cfLocation.y + cf.getHeight() + 20);
-                gameFrames.add(tempFrame);
-                
                 cb.setPerspective(Boolean.parseBoolean(data[0]));
                 // data[1] will be other person's name
-                tempFrame = GameWindows.showNameWindow(_name, true);
-                tempFrame.setLocation(cfLocation.x - 20 - tempFrame.getWidth(), 
-                        cfLocation.y);
-                gameFrames.add(tempFrame);
-                tempFrame = GameWindows.showNameWindow(data[1], false);
+                Point cfLocation = cf.getLocation();
+                JFrame tempFrame = GameWindows.showNameAndTimeWindow(_name, true, tc, cb.getPerspective());
                 tempFrame.setLocation(cfLocation.x - 20 - tempFrame.getWidth(), 
                         cfLocation.y + cf.getHeight() - tempFrame.getHeight());
+                gameFrames.add(tempFrame);
+                tempFrame = GameWindows.showNameAndTimeWindow(data[1], false, tc, !cb.getPerspective());
+                tempFrame.setLocation(cfLocation.x - 20 - tempFrame.getWidth(), 
+                        cfLocation.y);
                 gameFrames.add(tempFrame);
                 cb.recalculateMoves();
                 cb.unlock();
