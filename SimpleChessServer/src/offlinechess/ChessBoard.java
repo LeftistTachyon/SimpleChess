@@ -403,7 +403,6 @@ public class ChessBoard {
             System.out.println("\n\nNULLPOINTEREXCEPTION");
             printBoard();
             System.out.println(board[toWhereX][toWhereY]);
-            System.out.println(board[toWhereX][toWhereY].getCharRepresentation());
         }
     }
     
