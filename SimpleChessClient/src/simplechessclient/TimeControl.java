@@ -23,6 +23,11 @@ public class TimeControl implements Runnable {
     private final int increment;
     
     /**
+     * The amount of grace time in seconds
+     */
+    private final int graceTime;
+    
+    /**
      * The amount of time white has
      */
     private DoubleProperty whiteTime;
@@ -31,6 +36,16 @@ public class TimeControl implements Runnable {
      * The amount of time black has
      */
     private DoubleProperty blackTime;
+    
+    /**
+     * The amount of grace time white has
+     */
+    private DoubleProperty whiteGraceTime;
+    
+    /**
+     * The amount of grace time black has
+     */
+    private DoubleProperty blackGraceTime;
     
     /**
      * Whose turn it is
@@ -51,21 +66,25 @@ public class TimeControl implements Runnable {
      * A new Time Control: start + add
      * @param start the starting amount of seconds
      * @param add the increment
+     * @param grace the amount of grace time
      */
-    public TimeControl(int start, int add) {
+    public TimeControl(int start, int add, int grace) {
         actionListeners = new ArrayList<>();
         changeListeners = new ArrayList<>();
         startingSeconds = start;
         increment = add;
+        graceTime = grace;
         whiteTime = new SimpleDoubleProperty(startingSeconds); 
         blackTime = new SimpleDoubleProperty(startingSeconds);
+        whiteGraceTime = new SimpleDoubleProperty(graceTime);
+        blackGraceTime = new SimpleDoubleProperty(graceTime);
     }
     
     /**
      * Creates a default TimeControl instance with (1+0).
      */
     public TimeControl() {
-        this(60, 0);
+        this(60, 0, 15);
     }
     
     /**
@@ -96,27 +115,39 @@ public class TimeControl implements Runnable {
     @Override
     public void run() {
         if(turn) {
-            // whiteTime -= 0.1;
-            if(whiteTime.get() > 0) {
-                whiteTime.set(whiteTime.get() - 0.1);
-                notifyChangeListeners(true);
+            if(whiteGraceTime.get() < 0) {
+                // whiteTime -= 0.1;
+                if (whiteTime.get() > 0) {
+                    whiteTime.set(whiteTime.get() - 0.1);
+                    notifyChangeListeners(true);
+                } else {
+                    notifyActionListeners("TIMEOUTtrue");
+                }
             } else {
-                notifyActionListeners("TIMEOUTtrue");
+                whiteGraceTime.set(whiteGraceTime.get() - 0.1);
+                notifyChangeListeners(true);
+                if(whiteGraceTime.get() < 0) {
+                    notifyActionListeners("NOGRACEtrue");
+                    System.out.println("NOGRACEtrue");
+                }
             }
         } else {
-            // blackTime -= 0.1;
-            if(blackTime.get() > 0) {
-                blackTime.set(blackTime.get() - 0.1);
-                notifyChangeListeners(false);
+            if(blackGraceTime.get() < 0) {
+                // blackTime -= 0.1;
+                if (blackTime.get() > 0) {
+                    blackTime.set(blackTime.get() - 0.1);
+                    notifyChangeListeners(true);
+                } else {
+                    notifyActionListeners("TIMEOUTfalse");
+                }
             } else {
-                notifyActionListeners("TIMEOUTfalse");
+                blackGraceTime.set(blackGraceTime.get() - 0.1);
+                notifyChangeListeners(true);
+                if(blackGraceTime.get() < 0) {
+                    notifyActionListeners("NOGRACEfalse");
+                    System.out.println("NOGRACEfalse");
+                }
             }
-        }
-        if(turn && whiteTime.get()%1 == 0.0) {
-            System.out.println("White time: " + whiteTime);
-        }
-        if(!turn && blackTime.get()%1 == 0.0) {
-            System.out.println("Black time: " + blackTime);
         }
     }
     
@@ -126,6 +157,8 @@ public class TimeControl implements Runnable {
     public void reset() {
         whiteTime = new SimpleDoubleProperty(startingSeconds);
         blackTime = new SimpleDoubleProperty(startingSeconds);
+        whiteGraceTime = new SimpleDoubleProperty(graceTime);
+        blackGraceTime = new SimpleDoubleProperty(graceTime);
     }
 
     /**
