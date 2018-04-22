@@ -123,6 +123,7 @@ public class ServerCommunication {
         
         LinkedList<JFrame> gameFrames = new LinkedList<>();
         ScheduledExecutorService service = null;
+        int temp = 0;
         String _name = null;
         
         while(true) {
@@ -131,10 +132,11 @@ public class ServerCommunication {
                 return;
             }
             if(line.startsWith("SUBMITNAME")) {
-                _name = getName();
+                _name = getName(temp++ == 0);
                 out.println(_name);
                 System.out.println(_name);
             } else if(line.startsWith("NAMEACCEPTED")) {
+                temp = 0;
                 // init stuff
                 cf.start();
                 try {
@@ -242,13 +244,14 @@ public class ServerCommunication {
 
     /**
      * Prompt for and return the desired screen name.
+     * @param again whether this method needs to state not to enter the same name again
      */
-    private String getName() {
+    private String getName(boolean again) {
         String s = null;
         do {
             s = JOptionPane.showInputDialog(
                 cf,
-                "Choose a screen name (no spaces):",
+                    again?"Choose a screen name (no spaces):":"Choose a screen name (not the same name)(no spaces):",
                 "Screen name selection",
                 JOptionPane.PLAIN_MESSAGE);
             if(s == null) System.exit(0);
