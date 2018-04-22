@@ -2,6 +2,7 @@ package simplechessclient;
 
 import java.awt.Point;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -171,14 +172,26 @@ public class ServerCommunication {
                 cb.setPerspective(Boolean.parseBoolean(data[0]));
                 // data[1] will be other person's name
                 Point cfLocation = cf.getLocation();
-                JFrame tempFrame = GameWindows.showNameAndTimeWindow(_name, true, tc, !cb.getPerspective());
-                tempFrame.setLocation(cfLocation.x - 20 - tempFrame.getWidth(), 
-                        cfLocation.y + cf.getHeight() - tempFrame.getHeight());
-                gameFrames.add(tempFrame);
-                tempFrame = GameWindows.showNameAndTimeWindow(data[1], false, tc, cb.getPerspective());
-                tempFrame.setLocation(cfLocation.x - 20 - tempFrame.getWidth(), 
+                GameWindows.NameAndTimeWindow youFrame = GameWindows.showNameAndTimeWindow(_name, true, tc, cb.getPerspective());
+                youFrame.setLocation(cfLocation.x - 20 - youFrame.getWidth(), 
+                        cfLocation.y + cf.getHeight() - youFrame.getHeight());
+                gameFrames.add(youFrame);
+                GameWindows.NameAndTimeWindow theirFrame = GameWindows.showNameAndTimeWindow(data[1], false, tc, !cb.getPerspective());
+                theirFrame.setLocation(cfLocation.x - 20 - theirFrame.getWidth(), 
                         cfLocation.y);
-                gameFrames.add(tempFrame);
+                gameFrames.add(theirFrame);
+                tc.addActionListener((ActionEvent ae) -> {
+                    String actionCommand = ae.getActionCommand();
+                    if(actionCommand.startsWith("ENDGRACE")) {
+                        if(Boolean.parseBoolean(actionCommand.substring(8))) {
+                            youFrame.disableBottomPanel();
+                            GameWindows.showBar(youFrame);
+                        } else {
+                            theirFrame.disableBottomPanel();
+                            GameWindows.showBar(theirFrame);
+                        }
+                    }
+                });
                 cb.recalculateMoves();
                 cb.unlock();
             } else if(line.startsWith("ENDGAME")) {

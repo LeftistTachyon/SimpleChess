@@ -1,12 +1,16 @@
 package simplechessclient;
 
+import java.awt.EventQueue;
+import java.awt.Font;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javax.swing.GroupLayout;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.LayoutStyle;
+import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
@@ -18,7 +22,7 @@ public class GameWindows {
     /**
      * A Window that contains the time control of the game.
      */
-    private static class TimeWindow extends JFrame {
+    static class TimeWindow extends JFrame {
         /** 
          * Creates new form TimeWindow. 
          * @param tc the TimeControl
@@ -45,7 +49,7 @@ public class GameWindows {
             setTitle("Timers");
             setResizable(false);
 
-            jLabel.setFont(new java.awt.Font("Segoe UI", 0, 48)); // NOI18N
+            jLabel.setFont(new Font("Segoe UI", 0, 48)); // NOI18N
             jLabel.setText("0:00.0|0:00.0");
             jLabel.setToolTipText("");
 
@@ -98,7 +102,7 @@ public class GameWindows {
         JFrame frame = new GameWindows.TimeWindow(tc);
         frame.setSize(277, frame.getHeight());
         
-        java.awt.EventQueue.invokeLater(() -> {
+        EventQueue.invokeLater(() -> {
             frame.setVisible(true);
         });
         
@@ -110,7 +114,7 @@ public class GameWindows {
     /**
      * A Window that displays the name of you or your opponent.
      */
-    private static class NameWindow extends JFrame {
+    static class NameWindow extends JFrame {
     
         /** Creates new form NameWindow */
         public NameWindow(String name, boolean isYou) {
@@ -131,11 +135,11 @@ public class GameWindows {
             setTitle("Name");
             setResizable(false);
 
-            nameLabel.setFont(new java.awt.Font("Segoe UI", 0, 48)); // NOI18N
+            nameLabel.setFont(new Font("Segoe UI", 0, 48)); // NOI18N
             nameLabel.setText(name);
             nameLabel.setToolTipText("");
 
-            isYouLabel.setFont(new java.awt.Font("Segoe UI", 0, 15)); // NOI18N
+            isYouLabel.setFont(new Font("Segoe UI", 0, 15)); // NOI18N
             isYouLabel.setText(isYou?"You:":"Opponent:");
 
             GroupLayout layout = new GroupLayout(getContentPane());
@@ -193,11 +197,9 @@ public class GameWindows {
         //</editor-fold>
         
         JFrame frame = new GameWindows.NameWindow(name, isYou);
-        if(frame.getWidth() < 220) {
-            frame.setSize(220, frame.getHeight());
-        }
+        showBar(frame);
         
-        java.awt.EventQueue.invokeLater(() -> {
+        EventQueue.invokeLater(() -> {
             frame.setVisible(true);
         });
         
@@ -207,8 +209,8 @@ public class GameWindows {
     /**
      * A Window that displays a name and a time.
      */
-    private static class NameAndTimeWindow extends JFrame {
-
+    static class NameAndTimeWindow extends JFrame {
+        
         /** Creates new form NameAndTimeWindow */
         public NameAndTimeWindow(String name, boolean isYou, TimeControl tc, boolean isWhite) {
             initComponents(name, isYou, tc, isWhite);
@@ -221,37 +223,63 @@ public class GameWindows {
          */
         // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
         private void initComponents(String name, boolean isYou, TimeControl tc, boolean isWhite) {
-            nameLabel = new JLabel();
+
             isYouLabel = new JLabel();
-            jSeparator = new JSeparator();
+            nameLabel = new JLabel();
+            topSeparator = new JSeparator();
             timeLabel = new JLabel();
+            bottomPanel = new JPanel();
+            bottomSeparator = new JSeparator();
+            graceLabel = new JLabel();
             
-            tc.addChangeListener(
-                    (ChangeListener) (ObservableValue observable, Object oldValue, Object newValue) -> {
-                timeLabel.setText(tc.toString(isWhite));
+            tc.addChangeListener((ChangeListener) (ObservableValue observable, Object oldValue, Object newValue) -> {
+                timeLabel.setText(tc.toString(!isWhite));
             });
 
             setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-            setTitle("Timers");
+            setTitle("Player Info");
             setResizable(false);
 
-            nameLabel.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
+            isYouLabel.setFont(new Font("Segoe UI", 0, 15)); // NOI18N
+            isYouLabel.setText(isYou?"You:":"Opponent:");
+
+            nameLabel.setFont(new Font("Segoe UI", 0, 36)); // NOI18N
             nameLabel.setText(name);
             nameLabel.setToolTipText(isYou?"Your name":"Your opponent\'s name");
 
-            isYouLabel.setFont(new java.awt.Font("Segoe UI", 0, 15)); // NOI18N
-            isYouLabel.setText(isYou?"You:":"Opponent:");
+            timeLabel.setFont(new Font("Consolas", 0, 36)); // NOI18N
+            timeLabel.setText("0:00.0");
+            timeLabel.setToolTipText(isYou?"Your time":"Your opponent\'s time");
 
-            timeLabel.setFont(new java.awt.Font("Consolas", 0, 36)); // NOI18N
-            timeLabel.setText("00:00.0");
-            timeLabel.setToolTipText(isYou?"The time you have left"
-                    :"The time your opponnet has left");
+            graceLabel.setFont(new Font("Segoe UI", 0, 11)); // NOI18N
+            graceLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            graceLabel.setText("You have 15 seconds to make your first move.");
+            graceLabel.setToolTipText("Grace time");
+
+            GroupLayout jPanel1Layout = new GroupLayout(bottomPanel);
+            bottomPanel.setLayout(jPanel1Layout);
+            jPanel1Layout.setHorizontalGroup(
+                jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                .addComponent(bottomSeparator)
+                .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addContainerGap()
+                    .addComponent(graceLabel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addContainerGap())
+            );
+            jPanel1Layout.setVerticalGroup(
+                jPanel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel1Layout.createSequentialGroup()
+                    .addComponent(bottomSeparator, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(graceLabel)
+                    .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            );
 
             GroupLayout layout = new GroupLayout(getContentPane());
             getContentPane().setLayout(layout);
             layout.setHorizontalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
-                .addComponent(jSeparator)
+                .addComponent(topSeparator)
                 .addGroup(layout.createSequentialGroup()
                     .addContainerGap()
                     .addGroup(layout.createParallelGroup(GroupLayout.Alignment.LEADING)
@@ -259,29 +287,42 @@ public class GameWindows {
                         .addComponent(nameLabel)
                         .addComponent(timeLabel))
                     .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addComponent(bottomPanel, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             );
             layout.setVerticalGroup(
                 layout.createParallelGroup(GroupLayout.Alignment.LEADING)
                 .addGroup(layout.createSequentialGroup()
-                    .addContainerGap()
+                    .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(isYouLabel)
                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                     .addComponent(nameLabel)
                     .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                    .addComponent(jSeparator, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                    .addComponent(topSeparator, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                     .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                     .addComponent(timeLabel)
-                    .addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
+                    .addComponent(bottomPanel, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
             );
 
             pack();
         }// </editor-fold>
+        
+        /**
+         * Sets the bottom panel to invisible
+         */
+        public void disableBottomPanel() {
+            // bottomPanel.setVisible(false);
+            bottomPanel.setOpaque(false);
+        }
 
         // Variables declaration - do not modify                     
-        private JLabel isYouLabel;
         private JLabel nameLabel;
+        private JLabel isYouLabel;
         private JLabel timeLabel;
-        private JSeparator jSeparator;
+        private JLabel graceLabel;
+        private JPanel bottomPanel;
+        private JSeparator topSeparator;
+        private JSeparator bottomSeparator;
         // End of variables declaration                   
     }
     
@@ -293,7 +334,7 @@ public class GameWindows {
      * @param isWhite whether this player is white
      * @return the NameAndTimeWindow
      */
-    public static JFrame showNameAndTimeWindow(String name, boolean isYou, TimeControl tc, boolean isWhite) {
+    public static NameAndTimeWindow showNameAndTimeWindow(String name, boolean isYou, TimeControl tc, boolean isWhite) {
         //<editor-fold defaultstate="collapsed" desc="Look and feel setting code (optional) ">
         /* If Nimbus (introduced in Java SE 6) is not available, stay with the default look and feel.
          * For details see http://download.oracle.com/javase/tutorial/uiswing/lookandfeel/plaf.html 
@@ -307,19 +348,27 @@ public class GameWindows {
                 }
             }
         } catch(ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(TimeWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(NameAndTimeWindow.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
         
-        JFrame frame = new GameWindows.NameAndTimeWindow(name, isYou, tc, isWhite);
-        if(frame.getWidth() < 220) {
-            frame.setSize(220, frame.getHeight());
-        }
+        NameAndTimeWindow frame = new GameWindows.NameAndTimeWindow(name, isYou, tc, isWhite);
+        showBar(frame);
         
-        java.awt.EventQueue.invokeLater(() -> {
+        EventQueue.invokeLater(() -> {
             frame.setVisible(true);
         });
         
         return frame;
+    }
+    
+    /**
+     * Reshapes a JFrame to show the bar and be able to drag it.
+     * @param frame the JFrame to reshape
+     */
+    public static void showBar(JFrame frame) {
+        if(frame.getWidth() < 220) {
+            frame.setSize(220, frame.getHeight());
+        }
     }
 }
