@@ -1,8 +1,8 @@
 package simplechessclient;
 
 import java.awt.Point;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -279,6 +279,7 @@ public class ServerCommunication {
             default:
                 return;
         }
+        Toolkit.getDefaultToolkit().beep();
         JOptionPane.showMessageDialog(cf, message + why, 
                 "Game has ended", JOptionPane.INFORMATION_MESSAGE);
     }
