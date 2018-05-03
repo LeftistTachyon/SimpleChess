@@ -1,7 +1,6 @@
 package simplechessserver;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -44,6 +43,11 @@ public class ClientCommunication {
      * out. The int is for indexing the matches.
      */
     private static HashMap<Integer, Handler> matchedHandlers = new HashMap<>();
+    
+    /**
+     * The lock for synchronization for matchmaking.
+     */
+    private static final Object MATCH_LOCK = new Object();
     
     /**
      * A handler thread class.  Handlers are spawned from the listening
@@ -153,6 +157,7 @@ public class ClientCommunication {
                         if(unmatched.contains(this)) continue;
                         unmatched.add(this);
                         if(unmatched.size() >= 2) {
+                            synchronized(MATCH_LOCK) {
                             synchronized(unmatched) {
                                 Handler one = unmatched.remove(), two = unmatched.remove();
                                 int iD = matchedHandlers.size();
@@ -194,6 +199,7 @@ public class ClientCommunication {
                                 two.tc.start();
                                 one.cb.recalculateMoves();
                                 two.cb.recalculateMoves();
+                            }
                             }
                         }
                     } else if(line.startsWith("MOVE") && opponentID != -1) {

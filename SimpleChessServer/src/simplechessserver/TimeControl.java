@@ -20,6 +20,11 @@ public class TimeControl implements Runnable {
     private final int increment;
     
     /**
+     * The amount of grace time to start with
+     */
+    private final int graceTime;
+    
+    /**
      * The amount of time white has
      */
     private double whiteTime;
@@ -28,6 +33,16 @@ public class TimeControl implements Runnable {
      * The amount of time black has
      */
     private double blackTime;
+    
+    /**
+     * The amount of grace time white has
+     */
+    private double whiteGraceTime;
+    
+    /**
+     * The amount of grace time black has
+     */
+    private double blackGraceTime;
     
     /**
      * Whose turn it is
@@ -48,20 +63,24 @@ public class TimeControl implements Runnable {
      * A new Time Control: start + add
      * @param start the starting amount of seconds
      * @param add the increment
+     * @param grace the amount of grace time
      */
-    public TimeControl(int start, int add) {
+    public TimeControl(int start, int add, int grace) {
         listeners = new ArrayList<>();
         startingSeconds = start;
         increment = add;
+        graceTime = grace;
         whiteTime = startingSeconds; 
         blackTime = startingSeconds;
+        whiteGraceTime = graceTime;
+        blackGraceTime = graceTime;
     }
     
     /**
      * Creates a default TimeControl instance with (1+0).
      */
     public TimeControl() {
-        this(60, 0);
+        this(60, 0, 15);
     }
     
     /**
@@ -70,8 +89,10 @@ public class TimeControl implements Runnable {
     public void hit() {
         if(turn) {
             whiteTime += increment;
+            whiteGraceTime = 0;
         } else {
             blackTime += increment;
+            blackGraceTime = 0;
         }
         turn = !turn;
     }
@@ -99,17 +120,26 @@ public class TimeControl implements Runnable {
     public void run() {
         while(inGame) {
             if(turn) {
-                if(whiteTime > 0) whiteTime -= 0.1;
-                else notifyListeners("TIMEOUTtrue");
+                if(whiteGraceTime <= 0) {
+                    // whiteTime -= 0.1;
+                    if (whiteTime > 0) {
+                        whiteTime -= 0.1;
+                    } else {
+                        notifyListeners("TIMEOUTtrue");
+                    }
+                } else {
+                    whiteGraceTime -= 0.1;
+                }
             } else {
-                if(blackTime > 0) blackTime -= 0.1;
-                else notifyListeners("TIMEOUTfalse");
-            }
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException ex) {
-                System.out.println("Interrupted: " + ex.toString());
-                return;
+                if(blackGraceTime <= 0) {
+                    if (blackTime > 0) {
+                        blackTime -= 0.1;
+                    } else {
+                        notifyListeners("TIMEOUTfalse");
+                    }
+                } else {
+                    blackGraceTime -= 0.1;
+                }
             }
         }
     }
@@ -120,6 +150,8 @@ public class TimeControl implements Runnable {
     public void reset() {
         whiteTime = startingSeconds;
         blackTime = startingSeconds;
+        whiteGraceTime = graceTime;
+        blackGraceTime = graceTime;
     }
 
     /**
