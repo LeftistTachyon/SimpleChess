@@ -115,7 +115,7 @@ public class TimeControl implements Runnable {
     @Override
     public void run() {
         if(turn) {
-            if(whiteGraceTime.get() <= 0) {
+            if(whiteGraceTime.get() < 0) {
                 // whiteTime -= 0.1;
                 if (whiteTime.get() > 0) {
                     whiteTime.set(whiteTime.get() - 0.1);
@@ -132,7 +132,7 @@ public class TimeControl implements Runnable {
                 }
             }
         } else {
-            if(blackGraceTime.get() <= 0) {
+            if(blackGraceTime.get() < 0) {
                 // blackTime -= 0.1;
                 if (blackTime.get() > 0) {
                     blackTime.set(blackTime.get() - 0.1);
