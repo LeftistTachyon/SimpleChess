@@ -3,6 +3,8 @@ package simplechessserver;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Time control for chess
@@ -120,7 +122,7 @@ public class TimeControl implements Runnable {
     public void run() {
         while(inGame) {
             if(turn) {
-                if(whiteGraceTime <= 0) {
+                if(whiteGraceTime < 0) {
                     // whiteTime -= 0.1;
                     if (whiteTime > 0) {
                         whiteTime -= 0.1;
@@ -131,7 +133,7 @@ public class TimeControl implements Runnable {
                     whiteGraceTime -= 0.1;
                 }
             } else {
-                if(blackGraceTime <= 0) {
+                if(blackGraceTime < 0) {
                     if (blackTime > 0) {
                         blackTime -= 0.1;
                     } else {
@@ -140,6 +142,11 @@ public class TimeControl implements Runnable {
                 } else {
                     blackGraceTime -= 0.1;
                 }
+            }
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException ex) {
+                System.err.println("Interrupted");
             }
         }
     }
