@@ -30,22 +30,22 @@ public class TimeControl implements Runnable {
     /**
      * The amount of time white has
      */
-    private DoubleProperty whiteTime;
+    private double whiteTime;
     
     /**
      * The amount of time black has
      */
-    private DoubleProperty blackTime;
+    private double blackTime;
     
     /**
      * The amount of grace time white has
      */
-    private DoubleProperty whiteGraceTime;
+    private double whiteGraceTime;
     
     /**
      * The amount of grace time black has
      */
-    private DoubleProperty blackGraceTime;
+    private double blackGraceTime;
     
     /**
      * Whose turn it is
@@ -74,10 +74,10 @@ public class TimeControl implements Runnable {
         startingSeconds = start;
         increment = add;
         graceTime = grace;
-        whiteTime = new SimpleDoubleProperty(startingSeconds); 
-        blackTime = new SimpleDoubleProperty(startingSeconds);
-        whiteGraceTime = new SimpleDoubleProperty(graceTime);
-        blackGraceTime = new SimpleDoubleProperty(graceTime);
+        whiteTime = startingSeconds;
+        blackTime = startingSeconds;
+        whiteGraceTime = graceTime;
+        blackGraceTime = graceTime;
     }
     
     /**
@@ -93,10 +93,10 @@ public class TimeControl implements Runnable {
     public void hit() {
         if(turn) {
             // whiteTime += increment;
-            whiteTime.set(whiteTime.get() + increment);
+            whiteTime += increment;
         } else {
             // blackTime += increment;
-            blackTime.set(blackTime.get() + increment);
+            blackTime += increment;
         }
         turn = !turn;
     }
@@ -115,37 +115,35 @@ public class TimeControl implements Runnable {
     @Override
     public void run() {
         if(turn) {
-            if(whiteGraceTime.get() < 0) {
+            if(whiteGraceTime < 0) {
                 // whiteTime -= 0.1;
-                if (whiteTime.get() > 0) {
-                    whiteTime.set(whiteTime.get() - 0.1);
+                if (whiteTime > 0) {
+                    whiteTime -= 0.1;
                     notifyChangeListeners(true);
                 } else {
                     notifyActionListeners("TIMEOUTtrue");
                 }
             } else {
-                whiteGraceTime.set(whiteGraceTime.get() - 0.1);
+                whiteGraceTime -= 0.1;
                 notifyChangeListeners(true);
-                if(whiteGraceTime.get() < 0) {
+                if(whiteGraceTime < 0) {
                     notifyActionListeners("NOGRACEtrue");
-                    System.out.println("NOGRACEtrue");
                 }
             }
         } else {
-            if(blackGraceTime.get() < 0) {
+            if(blackGraceTime < 0) {
                 // blackTime -= 0.1;
-                if (blackTime.get() > 0) {
-                    blackTime.set(blackTime.get() - 0.1);
+                if (blackTime > 0) {
+                    blackTime -= 0.1;
                     notifyChangeListeners(true);
                 } else {
                     notifyActionListeners("TIMEOUTfalse");
                 }
             } else {
-                blackGraceTime.set(blackGraceTime.get() - 0.1);
+                blackGraceTime -= 0.1;
                 notifyChangeListeners(true);
-                if(blackGraceTime.get() < 0) {
+                if(blackGraceTime < 0) {
                     notifyActionListeners("NOGRACEfalse");
-                    System.out.println("NOGRACEfalse");
                 }
             }
         }
@@ -155,10 +153,10 @@ public class TimeControl implements Runnable {
      * Resets the clock
      */
     public void reset() {
-        whiteTime = new SimpleDoubleProperty(startingSeconds);
-        blackTime = new SimpleDoubleProperty(startingSeconds);
-        whiteGraceTime = new SimpleDoubleProperty(graceTime);
-        blackGraceTime = new SimpleDoubleProperty(graceTime);
+        whiteTime = startingSeconds;
+        blackTime = startingSeconds;
+        whiteGraceTime = graceTime;
+        blackGraceTime = graceTime;
     }
 
     /**
@@ -176,7 +174,7 @@ public class TimeControl implements Runnable {
      * @return a String representation of their current time state
      */
     public String toString(boolean whichSide) {
-        double time = (whichSide)?whiteTime.get():blackTime.get();
+        double time = (whichSide)?whiteTime:blackTime;
         if(time <= 0) {
             return "0:00.0";
         } else if(time <= 20) {
@@ -204,9 +202,9 @@ public class TimeControl implements Runnable {
      * Notifies all change listeners listening to this object
      */
     private void notifyChangeListeners(boolean white) {
-        double after = ((white)?whiteTime:blackTime).get();
+        double after = ((white)?whiteTime:blackTime);
         for(ChangeListener changeListener : changeListeners) {
-            changeListener.changed((white)?whiteTime:blackTime, after - 0.1, after);
+            changeListener.changed(null, after - 0.1, after);
         }
     }
     

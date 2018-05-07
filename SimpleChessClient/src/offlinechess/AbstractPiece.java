@@ -48,10 +48,10 @@ public abstract class AbstractPiece {
     /**
       * Determines whether a move is legal <br>
       * However, this method does not check for checks
-      * @param cb
-      * @param fromWhere
-      * @param toWhere
-      * @return 
+      * @param cb the board to check with
+      * @param fromWhere from where to move
+      * @param toWhere to where to move
+      * @return if this move is legal
       */
     public boolean isAllLegalMove(ChessBoard cb, String fromWhere, String toWhere) {
         return allLegalMoves(cb, fromWhere).contains(toWhere);
