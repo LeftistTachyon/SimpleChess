@@ -3,8 +3,6 @@ package simplechessserver;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Time control for chess
@@ -42,9 +40,19 @@ public class TimeControl implements Runnable {
     private double whiteGraceTime;
     
     /**
+     * The lock on white grace time
+     */
+    private final Object WHITE_TIME_LOCK = new Object();
+    
+    /**
      * The amount of grace time black has
      */
     private double blackGraceTime;
+    
+    /**
+     * The lock on black grace time
+     */
+    private final Object BLACK_TIME_LOCK = new Object();
     
     /**
      * Whose turn it is
@@ -82,7 +90,7 @@ public class TimeControl implements Runnable {
      * Creates a default TimeControl instance with (1+0).
      */
     public TimeControl() {
-        this(60, 0, 15);
+        this(60, 1, 15);
     }
     
     /**
@@ -90,11 +98,15 @@ public class TimeControl implements Runnable {
      */
     public void hit() {
         if(turn) {
-            whiteTime += increment;
-            whiteGraceTime = 0;
+            synchronized(WHITE_TIME_LOCK) {
+                whiteTime += increment;
+                whiteGraceTime = 0;
+            }
         } else {
-            blackTime += increment;
-            blackGraceTime = 0;
+            synchronized(BLACK_TIME_LOCK) {
+                blackTime += increment;
+                blackGraceTime = 0;
+            }
         }
         turn = !turn;
     }
@@ -122,25 +134,29 @@ public class TimeControl implements Runnable {
     public void run() {
         while(inGame) {
             if(turn) {
-                if(whiteGraceTime < 0) {
-                    // whiteTime -= 0.1;
-                    if (whiteTime > 0) {
-                        whiteTime -= 0.1;
+                synchronized(WHITE_TIME_LOCK) {
+                    if(whiteGraceTime <= 0) {
+                        // whiteTime -= 0.1;
+                        if (whiteTime > 0) {
+                            whiteTime -= 0.1;
+                        } else {
+                            notifyListeners("TIMEOUTtrue");
+                        }
                     } else {
-                        notifyListeners("TIMEOUTtrue");
+                        whiteGraceTime -= 0.1;
                     }
-                } else {
-                    whiteGraceTime -= 0.1;
                 }
             } else {
-                if(blackGraceTime < 0) {
-                    if (blackTime > 0) {
-                        blackTime -= 0.1;
+                synchronized(BLACK_TIME_LOCK) {
+                    if(blackGraceTime <= 0) {
+                        if (blackTime > 0) {
+                            blackTime -= 0.1;
+                        } else {
+                            notifyListeners("TIMEOUTfalse");
+                        }
                     } else {
-                        notifyListeners("TIMEOUTfalse");
+                        blackGraceTime -= 0.1;
                     }
-                } else {
-                    blackGraceTime -= 0.1;
                 }
             }
             try {
@@ -155,10 +171,14 @@ public class TimeControl implements Runnable {
      * Resets the clock
      */
     public void reset() {
-        whiteTime = startingSeconds;
-        blackTime = startingSeconds;
-        whiteGraceTime = graceTime;
-        blackGraceTime = graceTime;
+        synchronized(WHITE_TIME_LOCK) {
+            whiteTime = startingSeconds;
+            whiteGraceTime = graceTime;
+        }
+        synchronized(BLACK_TIME_LOCK) {
+            blackTime = startingSeconds;
+            blackGraceTime = graceTime;
+        }
     }
 
     /**
