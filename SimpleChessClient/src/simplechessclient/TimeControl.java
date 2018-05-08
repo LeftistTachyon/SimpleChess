@@ -3,8 +3,6 @@ package simplechessclient;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ChangeListener;
 
 /**
@@ -43,9 +41,19 @@ public class TimeControl implements Runnable {
     private double whiteGraceTime;
     
     /**
+     * The lock for white grace time
+     */
+    private final Object WHITE_GRACE_LOCK = new Object();
+    
+    /**
      * The amount of grace time black has
      */
     private double blackGraceTime;
+    
+    /**
+     * The lock for black grace time
+     */
+    private final Object BLACK_GRACE_LOCK = new Object();
     
     /**
      * Whose turn it is
@@ -84,7 +92,7 @@ public class TimeControl implements Runnable {
      * Creates a default TimeControl instance with (1+0).
      */
     public TimeControl() {
-        this(60, 0, 15);
+        this(60, 1, 15);
     }
     
     /**
@@ -93,10 +101,16 @@ public class TimeControl implements Runnable {
     public void hit() {
         if(turn) {
             // whiteTime += increment;
-            whiteTime += increment;
+            synchronized(WHITE_GRACE_LOCK) {
+                whiteTime += increment;
+                whiteGraceTime = 0;
+            }
         } else {
             // blackTime += increment;
-            blackTime += increment;
+            synchronized(BLACK_GRACE_LOCK) {
+                blackTime += increment;
+                blackGraceTime = 0;
+            }
         }
         turn = !turn;
     }
@@ -115,35 +129,39 @@ public class TimeControl implements Runnable {
     @Override
     public void run() {
         if(turn) {
-            if(whiteGraceTime < 0) {
-                // whiteTime -= 0.1;
-                if (whiteTime > 0) {
-                    whiteTime -= 0.1;
-                    notifyChangeListeners(true);
+            synchronized(WHITE_GRACE_LOCK) {
+                if(whiteGraceTime <= 0) {
+                    // whiteTime -= 0.1;
+                    if (whiteTime > 0) {
+                        whiteTime -= 0.1;
+                        notifyChangeListeners(true);
+                    } else {
+                        notifyActionListeners("TIMEOUTtrue");
+                    }
                 } else {
-                    notifyActionListeners("TIMEOUTtrue");
-                }
-            } else {
-                whiteGraceTime -= 0.1;
-                notifyChangeListeners(true);
-                if(whiteGraceTime < 0) {
-                    notifyActionListeners("NOGRACEtrue");
+                    whiteGraceTime -= 0.1;
+                    notifyChangeListeners(true);
+                    if(whiteGraceTime <= 0) {
+                        notifyActionListeners("NOGRACEtrue");
+                    }
                 }
             }
         } else {
-            if(blackGraceTime < 0) {
-                // blackTime -= 0.1;
-                if (blackTime > 0) {
-                    blackTime -= 0.1;
-                    notifyChangeListeners(true);
+            synchronized(BLACK_GRACE_LOCK) {
+                if(blackGraceTime <= 0) {
+                    // blackTime -= 0.1;
+                    if (blackTime > 0) {
+                        blackTime -= 0.1;
+                        notifyChangeListeners(true);
+                    } else {
+                        notifyActionListeners("TIMEOUTfalse");
+                    }
                 } else {
-                    notifyActionListeners("TIMEOUTfalse");
-                }
-            } else {
-                blackGraceTime -= 0.1;
-                notifyChangeListeners(true);
-                if(blackGraceTime < 0) {
-                    notifyActionListeners("NOGRACEfalse");
+                    blackGraceTime -= 0.1;
+                    notifyChangeListeners(true);
+                    if(blackGraceTime <= 0) {
+                        notifyActionListeners("NOGRACEfalse");
+                    }
                 }
             }
         }
@@ -153,10 +171,14 @@ public class TimeControl implements Runnable {
      * Resets the clock
      */
     public void reset() {
-        whiteTime = startingSeconds;
-        blackTime = startingSeconds;
-        whiteGraceTime = graceTime;
-        blackGraceTime = graceTime;
+        synchronized(WHITE_GRACE_LOCK) {
+            whiteTime = startingSeconds;
+            whiteGraceTime = graceTime;
+        }
+        synchronized(BLACK_GRACE_LOCK) {
+            blackTime = startingSeconds;
+            blackGraceTime = graceTime;
+        }
     }
 
     /**
