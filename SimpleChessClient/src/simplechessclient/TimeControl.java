@@ -103,12 +103,16 @@ public class TimeControl implements Runnable {
             // whiteTime += increment;
             synchronized(WHITE_GRACE_LOCK) {
                 whiteTime += increment;
+                if(whiteGraceTime != 0)
+                    notifyActionListeners("NOGRACEtrue");
                 whiteGraceTime = 0;
             }
         } else {
             // blackTime += increment;
             synchronized(BLACK_GRACE_LOCK) {
                 blackTime += increment;
+                if(blackGraceTime != 0)
+                    notifyActionListeners("NOGRACEfalse");
                 blackGraceTime = 0;
             }
         }
