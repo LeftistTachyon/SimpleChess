@@ -1,5 +1,7 @@
 # SimpleChess
 This project is the next iteration of my chess project.  
+### This branch  
+In this branch, I'm going to change all chess logic from Strings to Integers. Most of it, anyway.  
 ## Getting started  
 Please take a look at our [contributing guidlines](../master/CONTRIBUTING.md) and our [Contributor Code of Conduct](../master/CODE_OF_CONDUCT.md).  
 Also, [this Markdown Cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet) is very helpful.  
