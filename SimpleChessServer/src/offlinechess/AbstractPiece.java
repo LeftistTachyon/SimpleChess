@@ -33,7 +33,7 @@ public abstract class AbstractPiece {
      * @param toWhere to where the piece would be moved
      * @return whether the move would be legal
      */
-    public boolean isLegalMove(ChessBoard cb, String fromWhere, String toWhere) {
+    public boolean isLegalMove(ChessBoard cb, int fromWhere, int toWhere) {
         return legalMoves(cb, fromWhere).contains(toWhere);
     }
     
@@ -43,7 +43,7 @@ public abstract class AbstractPiece {
      * @param currentPosition the current place of the piece
      * @return all legal moves
      */
-    public abstract LinkedList<String> allLegalMoves(ChessBoard cb, String currentPosition);
+    public abstract LinkedList<Integer> allLegalMoves(ChessBoard cb, int currentPosition);
     
     /**
       * Determines whether a move is legal <br>
@@ -53,7 +53,7 @@ public abstract class AbstractPiece {
       * @param toWhere
       * @return 
       */
-    public boolean isAllLegalMove(ChessBoard cb, String fromWhere, String toWhere) {
+    public boolean isAllLegalMove(ChessBoard cb, int fromWhere, int toWhere) {
         return allLegalMoves(cb, fromWhere).contains(toWhere);
     }
     
@@ -63,20 +63,20 @@ public abstract class AbstractPiece {
      * @param currentPosition the current place of the piece
      * @return the legal moves this piece can make
      */
-    public LinkedList<String> legalMoves(ChessBoard cb, String currentPosition) {
-        LinkedList<String> allLegal = allLegalMoves(cb, currentPosition);
-        LinkedList<String> output = new LinkedList<>();
+    public LinkedList<Integer> legalMoves(ChessBoard cb, int currentPosition) {
+        LinkedList<Integer> allLegal = allLegalMoves(cb, currentPosition);
+        LinkedList<Integer> output = new LinkedList<>();
         AbstractPiece[][] initLayout = new AbstractPiece[cb.getBoard().length][cb.getBoard()[0].length];
         for(int i = 0; i < cb.getBoard().length; i++) {
             for(int j = 0; j < cb.getBoard()[i].length; j++) {
                 initLayout[i][j] = cb.getBoard()[i][j];
             }
         }
-        for(String square:allLegal) {
+        for(int square:allLegal) {
             cb.maybeMove(currentPosition, square);
             if(getCharRepresentation().equals("P") && 
-                    (ChessBoard.getRow(square) == 0 
-                    || ChessBoard.getRow(square) == 7)) 
+                    (square%10 == 0 
+                    || square%10 == 7)) 
                 cb.placePiece(new Queen(isWhite), square);
             if(!cb.inCheck(isWhite)) output.add(square);
             cb.setBoard(initLayout);
@@ -91,7 +91,7 @@ public abstract class AbstractPiece {
      * @param currentPosition the current place of the piece
      * @return all legal captures
      */
-    public abstract LinkedList<String> legalCaptures(ChessBoard cb, String currentPosition);
+    public abstract LinkedList<Integer> legalCaptures(ChessBoard cb, int currentPosition);
     
     /**
      * The ghostifier

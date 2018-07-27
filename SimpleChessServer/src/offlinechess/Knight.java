@@ -21,11 +21,11 @@ public class Knight extends AbstractPiece {
     }
 
     @Override
-    public LinkedList<String> allLegalMoves(ChessBoard cb, String currentPosition) {
+    public LinkedList<Integer> allLegalMoves(ChessBoard cb, int currentPosition) {
         if(!ChessBoard.isValidSquare(currentPosition)) throw new IllegalArgumentException("Invalid square");
         if(!(cb.getPiece(currentPosition).getCharRepresentation().equals("N"))) throw new IllegalArgumentException("This isn\'t a knight!");
-        LinkedList<String> output = new LinkedList<>();
-        String temp;
+        LinkedList<Integer> output = new LinkedList<>();
+        int temp;
         if(ChessBoard.isValidShift(currentPosition, -2, -1)) {
             temp = ChessBoard.shiftSquare(currentPosition, -2, -1);
             if(ChessBoard.isValidSquare(temp)) {
@@ -110,7 +110,7 @@ public class Knight extends AbstractPiece {
     }
 
     @Override
-    public LinkedList<String> legalCaptures(ChessBoard cb, String currentPosition) {
+    public LinkedList<Integer> legalCaptures(ChessBoard cb, int currentPosition) {
         return allLegalMoves(cb, currentPosition);
     }
     
