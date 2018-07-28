@@ -35,7 +35,7 @@ public class ChessBoard {
     /**
      * The selected square
      */
-    private String selected = null;
+    private int selected = -1;
     
     /**
      * Whether the player this board is facing is white
@@ -59,35 +59,35 @@ public class ChessBoard {
      * null stands for no open squares<br>
      * Controls en passant
      */
-    private String enPassant = null;
+    private int enPassant = -1;
     
     /**
      * A Map of all of the legal moves possible
      */
-    private HashMap<String, LinkedList<String>> allLegalMoves;
+    private HashMap<Integer, LinkedList<Integer>> allLegalMoves;
     
     /**
      * A Map of the king's position
      */
-    private HashMap<Boolean, String> kingPos;
+    private HashMap<Boolean, Integer> kingPos;
     
     /**
      * The last move by a piece.<br>
      * Controls drawing the last move
      */
-    private String lastMoveFrom = null, lastMoveTo = null;
+    private int lastMoveFrom = -1, lastMoveTo = -1;
     
     /**
      * The piece's square to be dragging from.<br>
      * Controls dragging pieces
      */
-    private String draggingFrom = null;
+    private int draggingFrom = -1;
     
     /**
      * A piece's square to be dragging from<br>
      * Controls dragging pieces
      */
-    private String fakeDraggingFrom = null;
+    private int fakeDraggingFrom = -1;
     
     /**
      * The last known non-null point the mouse was at.<br>
@@ -99,7 +99,7 @@ public class ChessBoard {
      * The square a pawn is promoting from<br>
      * Controls promotion
      */
-    private String promotingFrom = null;
+    private int promotingFrom = -1;
     
     /**
      * Counts how many times a position repeats<br>
@@ -233,8 +233,8 @@ public class ChessBoard {
         board[6][7] = new Knight(true);
         board[7][7] = new Rook(true);
         
-        kingPos.put(true, "e1");
-        kingPos.put(false, "e8");
+        kingPos.put(true, 47);
+        kingPos.put(false, 40);
     }
     
     /**
@@ -296,25 +296,25 @@ public class ChessBoard {
             }
         }
         g2D.setColor(new Color(155, 199, 0, 105));
-        if(lastMoveFrom != null) {
+        if(lastMoveFrom != -1) {
             if(fromPerspective) {
-                g2D.fillRect(getColumn(lastMoveFrom)*SQUARE_SIZE+x, 
-                        getRow(lastMoveFrom)*SQUARE_SIZE+y, 
+                g2D.fillRect((lastMoveFrom/10)*SQUARE_SIZE+x, 
+                        (lastMoveFrom%10)*SQUARE_SIZE+y, 
                         SQUARE_SIZE, SQUARE_SIZE);
             } else {
-                g2D.fillRect((7-getColumn(lastMoveFrom))*SQUARE_SIZE+x, 
-                        (7-getRow(lastMoveFrom))*SQUARE_SIZE+y, 
+                g2D.fillRect((7-lastMoveFrom/10)*SQUARE_SIZE+x, 
+                        (7-lastMoveFrom%10)*SQUARE_SIZE+y, 
                         SQUARE_SIZE, SQUARE_SIZE);
             }
         }
-        if(lastMoveTo != null) {
+        if(lastMoveTo != -1) {
             if(fromPerspective) {
-                g2D.fillRect(getColumn(lastMoveTo)*SQUARE_SIZE+x, 
-                        getRow(lastMoveTo)*SQUARE_SIZE+y, 
+                g2D.fillRect((lastMoveTo/10)*SQUARE_SIZE+x, 
+                        (lastMoveTo%10)*SQUARE_SIZE+y, 
                         SQUARE_SIZE, SQUARE_SIZE);
             } else {
-                g2D.fillRect((7-getColumn(lastMoveTo))*SQUARE_SIZE+x, 
-                        (7-getRow(lastMoveTo))*SQUARE_SIZE+y, 
+                g2D.fillRect((7-lastMoveTo/10)*SQUARE_SIZE+x, 
+                        (7-lastMoveTo%10)*SQUARE_SIZE+y, 
                         SQUARE_SIZE, SQUARE_SIZE);
             }
         }
@@ -346,7 +346,7 @@ public class ChessBoard {
         for(int i = 0; i < board.length; ++i) {
             for(int j = 0; j < board[i].length; ++j) {
                 if(board[i][j] != null) {
-                    if(toSquare(i, j).equals(draggingFrom) || toSquare(i, j).equals(fakeDraggingFrom)) {
+                    if(toSquare(i, j) == draggingFrom || toSquare(i, j) == fakeDraggingFrom) {
                         if(fromPerspective) {
                             board[i][j].drawGhost(g2D, (i * SQUARE_SIZE) + 7 + x, 
                                     (j * SQUARE_SIZE) + 7 + y, 50, 50);
@@ -373,21 +373,20 @@ public class ChessBoard {
      * @param g2D Graphics2D to draw on
      */
     private void drawSelection(Graphics2D g2D) {
-        String selection;
-        if(draggingFrom == null) {
-            if(selected == null) {
+        int selection;
+        if(draggingFrom == -1) {
+            if(selected == -1) {
                 return;
             } else selection = selected;
         } else selection = draggingFrom;
-        LinkedList<String> moves = allLegalMoves.get(selection);
+        LinkedList<Integer> moves = allLegalMoves.get(selection);
         if(moves == null) return;
         Color moveDest = new Color(20, 85, 30, 77);
         g2D.setColor(moveDest);
         final Point p = ChessPanel.getMouseCoordinates();
         //System.out.println((p == null)?"null":"(" + p.x + ", " + p.y + ")");
-        for(String s:moves) {
-            int x1 = ChessBoard.getColumn(s), 
-                    y1 = ChessBoard.getRow(s);
+        for(int s:moves) {
+            int x1 = s/10, y1 = s%10;
             int x2 = x1, y2 = y1;
             if(!fromPerspective) {
                 x2 = 7 - x1;
@@ -428,11 +427,11 @@ public class ChessBoard {
         Color selectionColor = new Color(20, 85, 30, 128);
         g2D.setColor(selectionColor);
         if(fromPerspective) {
-            g2D.fillRect(x+ChessBoard.getColumn(selection)*SQUARE_SIZE, 
-                    y+ChessBoard.getRow(selection)*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+            g2D.fillRect(x+(selection/10)*SQUARE_SIZE, 
+                    y+(selection%10)*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
         } else {
-            g2D.fillRect(x+(7-ChessBoard.getColumn(selection))*SQUARE_SIZE, 
-                    y+(7-ChessBoard.getRow(selection))*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
+            g2D.fillRect(x+(7-selection/10)*SQUARE_SIZE, 
+                    y+(7-selection%10)*SQUARE_SIZE, SQUARE_SIZE, SQUARE_SIZE);
         }
     }
     
@@ -576,8 +575,8 @@ public class ChessBoard {
             new Color(169, 0, 0, 0), new Color(158, 0, 0, 0)
         };
         if(inCheck(playerIsWhite)) {
-            String kingAt = kingPos.get(playerIsWhite);
-            int col = getColumn(kingAt), row = getRow(kingAt);
+            int kingAt = kingPos.get(playerIsWhite);
+            int col = kingAt/10, row = kingAt%10;
             if(!fromPerspective) {
                 col = 7 - col;
                 row = 7 - row;
@@ -604,12 +603,12 @@ public class ChessBoard {
      * @param g2D the Graphics2D to draw on
      */
     private void drawDraggedPiece(Graphics2D g2D) {
-        if(fakeDraggingFrom != null) {
+        if(fakeDraggingFrom != -1) {
             int midX = lastPoint.x - (SQUARE_SIZE / 2),
                     midY = lastPoint.y - (SQUARE_SIZE / 2);
             getPiece(fakeDraggingFrom).draw(g2D, midX, midY, 50, 50);
         }
-        if(draggingFrom != null) {
+        if(draggingFrom != -1) {
             int midX = lastPoint.x - (SQUARE_SIZE / 2),
                     midY = lastPoint.y - (SQUARE_SIZE / 2);
             getPiece(draggingFrom).draw(g2D, midX, midY, 50, 50);
@@ -621,9 +620,9 @@ public class ChessBoard {
      * @param square a square
      * @return the piece on that square, and if none, null
      */
-    public AbstractPiece getPiece(String square) {
+    public AbstractPiece getPiece(int square) {
         if(isValidSquare(square)) {
-            return board[getColumn(square)][getRow(square)];
+            return board[square/10][square%10];
         } else throw new IllegalArgumentException("Invalid square");
     }
     
@@ -645,7 +644,7 @@ public class ChessBoard {
      * @param square a square
      * @return whether that square is empty
      */
-    public boolean isEmptySquare(String square) {
+    public boolean isEmptySquare(int square) {
         return getPiece(square) == null;
     }
     
@@ -664,13 +663,11 @@ public class ChessBoard {
      * @param s a square
      * @return whether the square is valid
      */
-    public static boolean isValidSquare(String s) {
-        if(s == null) return false;
-        if(s.length() == 2) {
-            int col = s.charAt(0)-'a', 
-                    row = 8 - Integer.parseInt(s.charAt(1) + "");
-            return Character.isLowerCase(s.charAt(0)) && 
-                    Character.isDigit(s.charAt(1)) && isValidSquare(col, row);
+    public static boolean isValidSquare(int s) {
+        if(s >= 0 && s <= 77) {
+            int col = s / 10, 
+                    row = s % 10;
+            return col >= 0 && col <= 7 && row >= 0 && row <= 7;
         } else return false;
     }
     
@@ -686,6 +683,8 @@ public class ChessBoard {
     
     /**
      * Determines which column a square is referring to<br>
+     * This method can be substituted by {@code /10} to increase speed, but it 
+     * does not check whether the square is legitimate<br>
      * <br>
      * The columns are ordered as such:<br>
      * |_|_|_|_|_|_|_|_|<br>
@@ -694,14 +693,16 @@ public class ChessBoard {
      * @param s a square
      * @return which column the String is referring to
      */
-    public static int getColumn(String s) {
+    public static int getColumn(int s) {
         if(isValidSquare(s)) {
-            return s.charAt(0)-'a';
+            return s / 10;
         } else throw new IllegalArgumentException("Invalid square");
     }
     
     /**
      * Determines which row a square is referring to<br>
+     * This method can be substituted by {@code %10} to increase speed, but it 
+     * does not check whether the square is legitimate<br>
      * <br>
      * The rows are ordered as such:<br>
      * ____<br>
@@ -717,9 +718,9 @@ public class ChessBoard {
      * @param s the square
      * @return the column / file
      */
-    public static int getRow(String s) {
+    public static int getRow(int s) {
         if(isValidSquare(s)) {
-            return 8 - Integer.parseInt(s.charAt(1) + "");
+            return s % 10;
         } else throw new IllegalArgumentException("Invalid square");
     }
     
@@ -731,7 +732,7 @@ public class ChessBoard {
      * @param rowShift how much to shift the rows
      * @return the shifted square
      */
-    public static String shiftSquare(int col, int row, int colShift, int rowShift) {
+    public static int shiftSquare(int col, int row, int colShift, int rowShift) {
         if(isValidSquare(col, row)) {
             int shiftedCol = col + colShift, shiftedRow = row + rowShift;
             if(isValidSquare(shiftedCol, shiftedRow)) {
@@ -747,12 +748,11 @@ public class ChessBoard {
      * @param rowShift how much to shift the rows
      * @return the shifted square
      */
-    public static String shiftSquare(String s, int colShift, int rowShift) {
+    public static int shiftSquare(int s, int colShift, int rowShift) {
         if(isValidSquare(s)) {
-            int col = getColumn(s), row = getRow(s);
-            int shiftedCol = col + colShift, shiftedRow = row + rowShift;
-            if(isValidSquare(shiftedCol, shiftedRow)) {
-                return toSquare(shiftedCol, shiftedRow);
+            s += colShift * 10 + rowShift;
+            if(isValidSquare(s)) {
+                return s;
             } else throw new IllegalArgumentException("Invalid shift");
         } else throw new IllegalArgumentException("Invalid square");
     }
@@ -779,21 +779,22 @@ public class ChessBoard {
      * @param rowShift how much to shift the rows
      * @return whether the shift is valid
      */
-    public static boolean isValidShift(String s, int colShift, int rowShift) {
-        return isValidShift(
-                ChessBoard.getColumn(s), ChessBoard.getRow(s), 
-                colShift, rowShift
-        );
+    public static boolean isValidShift(int s, int colShift, int rowShift) {
+        if(isValidSquare(s)) {
+            s += colShift * 10 + rowShift;
+            return isValidSquare(s);
+        } else return false;
     }
     
     /**
      * Determines the square represented by the row and column
+     * NOTE: always column first, then row
      * @param column the ABSOLUTE column
      * @param row the ABSOLUTE row
      * @return the square that is represented by the row and column
      */
-    public static String toSquare(int column, int row) {
-        return "" + (char)('a' + column) + (8 - row);
+    public static int toSquare(int column, int row) {
+        return 10 * column + row;
     }
     
     /**
@@ -806,8 +807,8 @@ public class ChessBoard {
             for(int j = 0; j < board[i].length; j++) {
                 if(board[i][j] == null) continue;
                 if(board[i][j].isWhite == playerIsWhite) {
-                    String current = ChessBoard.toSquare(i, j);
-                    LinkedList<String> moves = board[i][j].legalMoves(duplicate, current);
+                    int current = toSquare(i, j);
+                    LinkedList<Integer> moves = board[i][j].legalMoves(duplicate, current);
                     allLegalMoves.put(current, moves);
                 }
             }
@@ -819,13 +820,8 @@ public class ChessBoard {
      * @param fromWhere from where a piece is moved
      * @param toWhere where to move a piece
      */
-    public void movePiece(String fromWhere, String toWhere) {
-        movePiece(
-                ChessBoard.getColumn(fromWhere), 
-                ChessBoard.getRow(fromWhere), 
-                ChessBoard.getColumn(toWhere), 
-                ChessBoard.getRow(toWhere)
-        );
+    public void movePiece(int fromWhere, int toWhere) {
+        movePiece(fromWhere/10, fromWhere%10, toWhere/10, toWhere%10);
     }
     
     /**
@@ -841,15 +837,14 @@ public class ChessBoard {
         if(board[toWhereX][toWhereY].getCharRepresentation().equals("K")) {
             ((King)(board[toWhereX][toWhereY])).notifyOfMove();
         }
-        enPassant = null;
+        enPassant = -1;
         if(board[toWhereX][toWhereY].getCharRepresentation().equals("P")) {
             if(Math.abs(fromWhereY-toWhereY) == 2) {
-                String file = (char) ('a' + fromWhereX) + "", rank = String.valueOf(8-((fromWhereY+toWhereY)/2));
-                enPassant = file + rank;
+                enPassant = fromWhereX * 10 + ((fromWhereY+toWhereY)/2);
             }
         }
-        String kingAt = kingPos.get(playerIsWhite);
-        ((King)(board[getColumn(kingAt)][getRow(kingAt)])).notifyNoCheck();
+        int kingAt = kingPos.get(playerIsWhite);
+        ((King)(board[kingAt/10][kingAt%10])).notifyNoCheck();
         System.out.println("Moved: " + playerIsWhite);
         lastMoveFrom = toSquare(fromWhereX, fromWhereY);
         lastMoveTo = toSquare(toWhereX, toWhereY);
@@ -859,7 +854,7 @@ public class ChessBoard {
         resetKingPos();
         recalculateMoves();
         updatePos(miniFEN());
-        mr.moved(thisCopy, this, ChessBoard.toSquare(fromWhereX, fromWhereY), ChessBoard.toSquare(toWhereX, toWhereY));
+        mr.moved(thisCopy, this, toSquare(fromWhereX, fromWhereY), toSquare(toWhereX, toWhereY));
         if(checkMated(playerIsWhite)) System.out.println("Checkmate!\n");
         else if(inCheck(playerIsWhite)) {
             ((King)(getPiece(kingPos.get(playerIsWhite)))).notifyCheck();
@@ -872,11 +867,8 @@ public class ChessBoard {
      * @param fromWhere from where to move a piece
      * @param toWhere to where to move a piece
      */
-    public void maybeMove(String fromWhere, String toWhere) {
-        maybeMove(
-                getColumn(fromWhere), getRow(fromWhere), 
-                getColumn(toWhere), getRow(toWhere)
-        );
+    public void maybeMove(int fromWhere, int toWhere) {
+        maybeMove(fromWhere/10, fromWhere%10, toWhere/10, toWhere%10);
     }
     
     /**
@@ -901,8 +893,8 @@ public class ChessBoard {
                     board[0][fromWhereY] = null;
                 }
             }
-        } else if(toSquare(toWhereX, toWhereY).equals(enPassant)) {
-            board[getColumn(enPassant)][getRow(enPassant)+(fromWhereY-toWhereY)] = null;
+        } else if(toSquare(toWhereX, toWhereY) == enPassant) {
+            board[enPassant/10][enPassant%10+(fromWhereY-toWhereY)] = null;
         }
         
         board[toWhereX][toWhereY] = board[fromWhereX][fromWhereY];
@@ -916,13 +908,13 @@ public class ChessBoard {
      * @param toWhere to where to promote
      * @param toWhatPiece to what piece to promote to
      */
-    public void promotePiece(String fromWhere, String toWhere, int toWhatPiece) {
+    public void promotePiece(int fromWhere, int toWhere, int toWhatPiece) {
         if(!getPiece(fromWhere).getCharRepresentation().equals("P")) 
             assert false : "Cannot promote a non-pawn";
         boolean isWhite = getPiece(fromWhere).isWhite;
         ChessBoard thisCopy = new ChessBoard(this);
-        int fromWhereX = getColumn(fromWhere), fromWhereY = getRow(fromWhere);
-        int toWhereX = getColumn(toWhere), toWhereY = getRow(toWhere);
+        int fromWhereX = fromWhere/10, fromWhereY = fromWhere%10;
+        int toWhereX = toWhere/10, toWhereY = toWhere%10;
         board[fromWhereX][fromWhereY] = null;
         // board[toWhereX][toWhereY];
         switch(toWhatPiece) {
@@ -962,8 +954,8 @@ public class ChessBoard {
      * @deprecated since it is not needed
      */
     @Deprecated
-    public void placePiece(AbstractPiece ap, String where) {
-        placePiece(ap, getColumn(where), getRow(where));
+    public void placePiece(AbstractPiece ap, int where) {
+        placePiece(ap, where/10, where%10);
     }
     
     /**
@@ -990,9 +982,9 @@ public class ChessBoard {
                 AbstractPiece ap = getPiece(i, j);//lit dude lit
                 if(ap != null) {
                     if(ap.isWhite ^ isWhite) {
-                        //if(ap.legalCaptures(this, ChessBoard.toSquare(i, j)).contains(kingPos))
+                        //if(ap.legalCaptures(this, toSquare(i, j)).contains(kingPos))
                         // if the current opposite-colored piece can eat the king on the next move
-                        if(ap.isAllLegalMove(this, ChessBoard.toSquare(i, j), kingPos.get(isWhite))) {
+                        if(ap.isAllLegalMove(this, toSquare(i, j), kingPos.get(isWhite))) {
                             return true;
                         }
                     }
@@ -1009,7 +1001,7 @@ public class ChessBoard {
      */
     public boolean checkMated(boolean isWhite) {
         if(inCheck(isWhite)) {
-            for(String s : allLegalMoves.keySet()) {
+            for(int s : allLegalMoves.keySet()) {
                 if(!allLegalMoves.get(s).isEmpty()) return false;
             }
             return true;
@@ -1022,7 +1014,7 @@ public class ChessBoard {
      * @return whether one side is stalemated
      */
     public boolean stalemated(boolean isWhite) {
-        for(LinkedList<String> allLegalMove : allLegalMoves.values()) {
+        for(LinkedList<Integer> allLegalMove : allLegalMoves.values()) {
             if(!allLegalMove.isEmpty()) return false;
         }
         return !inCheck(isWhite);
@@ -1118,8 +1110,8 @@ public class ChessBoard {
      * @param square the square to check
      * @return whether the square is white
      */
-    public static boolean isSquareWhite(String square) {
-        return isSquareWhite(getColumn(square), getRow(square));
+    public static boolean isSquareWhite(int square) {
+        return isSquareWhite(square/10, square%10);
     }
     
     /**
@@ -1138,7 +1130,7 @@ public class ChessBoard {
      * @param isWhite whether the piece is white
      * @return where all of the pieces are
      */
-    public ArrayList<String> findAll(int whichPiece, boolean isWhite) {
+    public ArrayList<Integer> findAll(int whichPiece, boolean isWhite) {
         String representation;
         switch(whichPiece) {
             case MoveRecorder.BISHOP:
@@ -1162,7 +1154,7 @@ public class ChessBoard {
             default:
                 throw new IllegalArgumentException("Unknown piece type: " + whichPiece);
         }
-        ArrayList<String> output = new ArrayList<>();
+        ArrayList<Integer> output = new ArrayList<>();
         for(int i = 0; i < board.length; i++) {
             for (int j = 0; j < board[i].length; j++) {
                 if(board[i][j] == null) continue;
@@ -1178,30 +1170,30 @@ public class ChessBoard {
      * Refinds both kings.
      */
     public void resetKingPos() {
-        String bKing = null, wKing = null;
+        int bKing = -1, wKing = -1;
         OUTER: for(int i = 0; i < board.length; i++) {
             for(int j = 0; j < board[i].length; j++) {
                 if(board[i][j] == null) continue;
                 if(board[i][j].getCharRepresentation().equals("K")) {
                     if(board[i][j].isWhite) {
-                        if(wKing == null) {
+                        if(wKing == -1) {
                             wKing = toSquare(i, j);
                         } else {
                             assert false : "There are two white kings?!";
                         }
                     } else {
-                        if(bKing == null) {
+                        if(bKing == -1) {
                             bKing = toSquare(i, j);
                         } else {
                             assert false : "There are two black kings?!";
                         }
                     }
-                    if(wKing != null && bKing != null) break OUTER;
+                    if(wKing != -1 && bKing != -1) break OUTER;
                 }
             }
         }
-        if(wKing == null) assert false : "Cannot find white king";
-        if(bKing == null) assert false : "Cannot find black king";
+        if(wKing == -1) assert false : "Cannot find white king";
+        if(bKing == -1) assert false : "Cannot find black king";
         kingPos.put(true, wKing);
         kingPos.put(false, bKing);
     }
@@ -1226,15 +1218,15 @@ public class ChessBoard {
      * Notifies this that the board has been clicked on a square
      * @param square where the board has been clicked
      */
-    public void clicked(String square) {
+    public void clicked(int square) {
         if(locked) return;
-        if(selected == null && promotion == -1) {
+        if(selected == -1 && promotion == -1) {
             if(!isEmptySquare(square) && (getPiece(square).isWhite == playerIsWhite && playerIsWhite == fromPerspective)) {
                 selected = square;
             }
         } else if(promotion != -1) {
-            if(ChessBoard.getColumn(square) == promotion) {
-                String promoteTo = toSquare(promotion, (playerIsWhite)?0:7);
+            if(square/10 == promotion) {
+                int promoteTo = toSquare(promotion, (playerIsWhite)?0:7);
                 if(playerIsWhite) {
                     /**
                      * QUEEN
@@ -1242,7 +1234,7 @@ public class ChessBoard {
                      * BISHOP
                      * KNIGHT
                      */
-                    switch(ChessBoard.getRow(square)) {
+                    switch(square%10) {
                         case 0:
                             promotePiece(promotingFrom, promoteTo, MoveRecorder.QUEEN);
                             break;
@@ -1257,7 +1249,7 @@ public class ChessBoard {
                             break;
                     }
                 } else {
-                    switch(ChessBoard.getRow(square)) {
+                    switch(square%10) {
                         case 7:
                             promotePiece(promotingFrom, promoteTo, MoveRecorder.QUEEN);
                             break;
@@ -1272,39 +1264,41 @@ public class ChessBoard {
                             break;
                     }
                 }
-                promotingFrom = null;
+                promotingFrom = -1;
                 promotion = -1;
                 recalculateMoves();
             }
-        } else if(selected.equals(square)) {
-            selected = null;
+        } else if(selected == square) {
+            selected = -1;
         } else {
             if(!isEmptySquare(square)) {
                 if(getPiece(selected).isLegalMove(this, selected, square)) {
-                    if(getPiece(selected).getCharRepresentation().equals("P") && (ChessBoard.getRow(square) == 0 || ChessBoard.getRow(square) == 7)) {
-                        promotion = ChessBoard.getColumn(square);
+                    if(getPiece(selected).getCharRepresentation().equals("P") && 
+                            (square%10 == 0 || square%10 == 7)) {
+                        promotion = square/10;
                         promotingFrom = selected;
                     } else {
                         movePiece(selected, square);
-                        selected = null;
+                        selected = -1;
                     }
                 } else {
                     if(getPiece(square).isWhite == playerIsWhite) {
                         selected = square;
                     } else {
-                        selected = null;
+                        selected = -1;
                     }
                 }
             } else {
                 if(getPiece(selected).isLegalMove(this, selected, square)) {
-                    if(getPiece(selected).getCharRepresentation().equals("P") && (ChessBoard.getRow(square) == 0 || ChessBoard.getRow(square) == 7)) {
-                        promotion = ChessBoard.getColumn(square);
+                    if(getPiece(selected).getCharRepresentation().equals("P") && 
+                            (square%10 == 0 || square%10 == 7)) {
+                        promotion = square/10;
                         promotingFrom = selected;
                     } else {
                         movePiece(selected, square);
-                        selected = null;
+                        selected = -1;
                     }
-                } else selected = null;
+                } else selected = -1;
             }
         }
         System.out.println("selected: " + selected);
@@ -1314,7 +1308,7 @@ public class ChessBoard {
      * Enables dragging.
      * @param fromWhere from where the piece is being dragged 
      */
-    public void enableDragging(String fromWhere) {
+    public void enableDragging(int fromWhere) {
         if(!isEmptySquare(fromWhere)) 
             if(promotion == -1 && getPiece(fromWhere).isWhite == playerIsWhite 
                     && playerIsWhite == fromPerspective && !locked) 
@@ -1328,29 +1322,31 @@ public class ChessBoard {
      * Disables dragging.
      */
     public void disableDragging() {
-        if(fakeDraggingFrom != null) {
-            fakeDraggingFrom = null;
+        if(fakeDraggingFrom != -1) {
+            fakeDraggingFrom = -1;
             return;
         }
-        if(draggingFrom == null) return;
+        if(draggingFrom == -1) return;
         if(!locked) {
-            String dropSquare = toPerspectiveSquare((lastPoint.x - x) / SQUARE_SIZE, (lastPoint.y - y) / SQUARE_SIZE);
+            int dropSquare = toPerspectiveSquare((lastPoint.x - x) / SQUARE_SIZE, 
+                    (lastPoint.y - y) / SQUARE_SIZE);
             /*if(getPiece(draggingFrom).isLegalMove(this, draggingFrom, dropSquare)) {
                 movePiece(draggingFrom, dropSquare);
             }*/
             if (getPiece(draggingFrom).isLegalMove(this, draggingFrom, dropSquare)) {
-                if (getPiece(draggingFrom).getCharRepresentation().equals("P") && (ChessBoard.getRow(dropSquare) == 0 || ChessBoard.getRow(dropSquare) == 7)) {
-                    promotion = ChessBoard.getColumn(dropSquare);
+                if (getPiece(draggingFrom).getCharRepresentation().equals("P") && 
+                        (dropSquare%10 == 0 || dropSquare%10 == 7)) {
+                    promotion = dropSquare/10;
                     promotingFrom = draggingFrom;
                 } else {
                     movePiece(draggingFrom, dropSquare);
                 }
             }
-            if (!draggingFrom.equals(selected)) {
-                selected = null;
+            if (draggingFrom != selected) {
+                selected = -1;
             }
         }
-        draggingFrom = null;
+        draggingFrom = -1;
     }
 
     /**
@@ -1373,7 +1369,7 @@ public class ChessBoard {
      * Determines which square is open for en passant
      * @return which square is open for en passant
      */
-    public String getEnPassant() {
+    public int getEnPassant() {
         return enPassant;
     }
 
@@ -1399,7 +1395,7 @@ public class ChessBoard {
      * @param yPos the y-position of the mouse
      * @return a square
      */
-    public String toSquareFromPos(int xPos, int yPos) {
+    public int toSquareFromPos(int xPos, int yPos) {
         int x1 = (xPos - x)/SQUARE_SIZE, y1 = (yPos - y)/SQUARE_SIZE;
         return toPerspectiveSquare(x1, y1);
     }
@@ -1410,8 +1406,8 @@ public class ChessBoard {
      * @param y the y position of the square
      * @return the square being referenced in perspective
      */
-    public String toPerspectiveSquare(int x, int y) {
-        String output = (fromPerspective) ? toSquare(x, y) : rotateSquare180(x, y);
+    public int toPerspectiveSquare(int x, int y) {
+        int output = (fromPerspective) ? toSquare(x, y) : rotateSquare180(x, y);
         return (isValidSquare(output))? output : null;
     }
     
@@ -1420,8 +1416,8 @@ public class ChessBoard {
      * @param s the square to rotate
      * @return the resulting square
      */
-    public String rotateSquare180(String s) {
-        return rotateSquare180(getColumn(s), getRow(s));
+    public int rotateSquare180(int s) {
+        return rotateSquare180(s/10, s%10);
     }
     
     /**
@@ -1430,8 +1426,8 @@ public class ChessBoard {
      * @param y the y position of the square to rotate
      * @return the resulting square
      */
-    public String rotateSquare180(int x, int y) {
-        String output = toSquare(7-x, 7-y);
+    public int rotateSquare180(int x, int y) {
+        int output = toSquare(7-x, 7-y);
         return (isValidSquare(output))? output : null;
     }
 

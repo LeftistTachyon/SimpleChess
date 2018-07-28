@@ -80,21 +80,23 @@ public class MoveRecorder {
      * @param capture whether this piece is capturing something
      * @return the String that denotes the move
      */
-    public String toMoveString(String fromWhere, String toWhere, int whichPiece, boolean capture) {
+    public String toMoveString(int fromWhere, int toWhere, int whichPiece, boolean capture) {
         String captureSymbol = (capture)?"x":"";
         switch(whichPiece) {
             case BISHOP:
-                return "B" + captureSymbol + toWhere;
+                return "B" + captureSymbol + toStringSquare(toWhere);
             case KING:
-                return "K" + captureSymbol + toWhere;
+                return "K" + captureSymbol + toStringSquare(toWhere);
             case KNIGHT:
-                return "N" + captureSymbol + toWhere;
+                return "N" + captureSymbol + toStringSquare(toWhere);
             case PAWN:
-                return (capture)?fromWhere.substring(0, 1) + "x" + toWhere:toWhere;
+                return (capture)?toStringSquare(fromWhere).substring(0, 1) + 
+                                "x" + toStringSquare(toWhere)
+                        :toStringSquare(toWhere);
             case QUEEN:
-                return "Q" + captureSymbol + toWhere;
+                return "Q" + captureSymbol + toStringSquare(toWhere);
             case ROOK:
-                return "R" + captureSymbol + toWhere;
+                return "R" + captureSymbol + toStringSquare(toWhere);
             default:
                 return "";
         }
@@ -109,22 +111,23 @@ public class MoveRecorder {
      * @param capture whether this piece is capturing something
      * @return the String that denotes the move
      */
-    public String toMoveStringF(String toWhere, int column, int whichPiece, boolean capture) {
+    public String toMoveStringF(int toWhere, int column, int whichPiece, boolean capture) {
         String captureSymbol = (capture)?"x":"";
         String file = "" + (char)(column + 'a');
         switch(whichPiece) {
             case BISHOP:
-                return "B" + file + captureSymbol + toWhere;
+                return "B" + file + captureSymbol + toStringSquare(toWhere);
             case KING:
-                return "K" + file + captureSymbol + toWhere;
+                return "K" + file + captureSymbol + toStringSquare(toWhere);
             case KNIGHT:
-                return "N" + file + captureSymbol + toWhere;
+                return "N" + file + captureSymbol + toStringSquare(toWhere);
             case PAWN:
-                return (capture)?file + "x" + toWhere:toWhere;
+                return (capture)?file + "x" + toStringSquare(toWhere):
+                        toStringSquare(toWhere);
             case QUEEN:
-                return "Q" + file + captureSymbol + toWhere;
+                return "Q" + file + captureSymbol + toStringSquare(toWhere);
             case ROOK:
-                return "R" + file + captureSymbol + toWhere;
+                return "R" + file + captureSymbol + toStringSquare(toWhere);
             default:
                 return "";
         }
@@ -139,20 +142,20 @@ public class MoveRecorder {
      * @param capture whether this piece is capturing something
      * @return the String that denotes the move
      */
-    public String toMoveStringR(String toWhere, int row, int whichPiece, boolean capture) {
+    public String toMoveStringR(int toWhere, int row, int whichPiece, boolean capture) {
         String captureSymbol = (capture)?"x":"";
         row = 8 - row;
         switch(whichPiece) {
             case BISHOP:
-                return "B" + row + captureSymbol + toWhere;
+                return "B" + row + captureSymbol + toStringSquare(toWhere);
             case KING:
-                return "K" + row + captureSymbol + toWhere;
+                return "K" + row + captureSymbol + toStringSquare(toWhere);
             case KNIGHT:
-                return "N" + row + captureSymbol + toWhere;
+                return "N" + row + captureSymbol + toStringSquare(toWhere);
             case QUEEN:
-                return "Q" + row + captureSymbol + toWhere;
+                return "Q" + row + captureSymbol + toStringSquare(toWhere);
             case ROOK:
-                return "R" + row + captureSymbol + toWhere;
+                return "R" + row + captureSymbol + toStringSquare(toWhere);
             default:
                 return "";
         }
@@ -167,19 +170,24 @@ public class MoveRecorder {
      * @param capture whether this piece is capturing something
      * @return the String that denotes the move
      */
-    public String toMoveStringFR(String fromWhere, String toWhere, int whichPiece, boolean capture) {
+    public String toMoveStringFR(int fromWhere, int toWhere, int whichPiece, boolean capture) {
         String captureSymbol = (capture)?"x":"";
         switch(whichPiece) {
             case BISHOP:
-                return "B" + fromWhere + captureSymbol + toWhere;
+                return "B" + toStringSquare(fromWhere) + captureSymbol + 
+                        toStringSquare(toWhere);
             case KING:
-                return "K" + fromWhere + captureSymbol + toWhere;
+                return "K" + toStringSquare(fromWhere) + captureSymbol + 
+                        toStringSquare(toWhere);
             case KNIGHT:
-                return "N" + fromWhere + captureSymbol + toWhere;
+                return "N" + toStringSquare(fromWhere) + captureSymbol + 
+                        toStringSquare(toWhere);
             case QUEEN:
-                return "Q" + fromWhere + captureSymbol + toWhere;
+                return "Q" + toStringSquare(fromWhere) + captureSymbol + 
+                        toStringSquare(toWhere);
             case ROOK:
-                return "R" + fromWhere + captureSymbol + toWhere;
+                return "R" + toStringSquare(fromWhere) + captureSymbol + 
+                        toStringSquare(toWhere);
             default:
                 return "";
         }
@@ -222,7 +230,7 @@ public class MoveRecorder {
      * @param fromWhere from where the piece was moved
      * @param toWhere to where the piece was moved
      */
-    public void moved(ChessBoard before, ChessBoard after, String fromWhere, String toWhere) {
+    public void moved(ChessBoard before, ChessBoard after, int fromWhere, int toWhere) {
         /*moved(before, 
                 ChessBoard.getColumn(fromWhere), ChessBoard.getRow(fromWhere), 
                 ChessBoard.getColumn(toWhere), ChessBoard.getRow(toWhere));*/
@@ -232,7 +240,7 @@ public class MoveRecorder {
         
         switch(toMove.getCharRepresentation()) {
             case "P":
-                if(ChessBoard.getRow(toWhere) == 0 || ChessBoard.getRow(toWhere) == 7) {
+                if(toWhere%10 == 0 || toWhere%10 == 7) {
                     switch(after.getPiece(toWhere).getCharRepresentation()) {
                         case "N":
                             moves.add(addChecks(promotionMoveString(toMoveString(fromWhere, toWhere, PAWN, isCapture(before, toWhere)), KNIGHT), after, after.getPiece(toWhere).isWhite));
@@ -252,8 +260,8 @@ public class MoveRecorder {
                 }
                 break;
             case "K":
-                if(Math.abs(ChessBoard.getColumn(fromWhere)-ChessBoard.getColumn(toWhere)) == 2) {
-                    moves.add(addChecks(castlingMoveString(ChessBoard.getColumn(fromWhere) < ChessBoard.getColumn(toWhere)), after, after.getPiece(toWhere).isWhite));
+                if(Math.abs(fromWhere/10-toWhere/10) == 2) {
+                    moves.add(addChecks(castlingMoveString(fromWhere/10 < toWhere/10), after, after.getPiece(toWhere).isWhite));
                 } else {
                     moves.add(addChecks(toMoveString(fromWhere, toWhere, KING, isCapture(before, toWhere)), after, after.getPiece(toWhere).isWhite));
                 }
@@ -301,11 +309,11 @@ public class MoveRecorder {
      * @param toWhere to where the piece was moved
      * @return whether a move is a capture
      */
-    private boolean isCapture(ChessBoard before, String toWhere) {
-        if(before.getEnPassant() == null) {
+    private boolean isCapture(ChessBoard before, int toWhere) {
+        if(before.getEnPassant() == -1) {
             return !before.isEmptySquare(toWhere);
         } else {
-            return !before.isEmptySquare(toWhere) || before.getEnPassant().equals(toWhere);
+            return !before.isEmptySquare(toWhere) || before.getEnPassant() == toWhere;
         }
     }
     
@@ -317,15 +325,15 @@ public class MoveRecorder {
      * @param piece which piece is to be moved
      * @return A String that represents the move
      */
-    private String moveString(ChessBoard before, String fromWhere, String toWhere, AbstractPiece piece, int whichPiece, boolean capture) {
+    private String moveString(ChessBoard before, int fromWhere, int toWhere, AbstractPiece piece, int whichPiece, boolean capture) {
         if(!piece.isAllLegalMove(before, fromWhere, toWhere)) 
-            throw new IllegalArgumentException("This isn\'t a legal move");
-        ArrayList<String> allPiece = before.findAll(whichPiece, piece.isWhite);
+            throw new IllegalArgumentException("This isn\'t a legal move: from " + fromWhere + " to " + toWhere);
+        ArrayList<Integer> allPiece = before.findAll(whichPiece, piece.isWhite);
         boolean needRank = false, needFile = false;
-        for(String square:allPiece) {
-            if(!fromWhere.equals(square)) {
+        for(int square:allPiece) {
+            if(fromWhere != square) {
                 if(before.getPiece(square).isLegalMove(before, square, toWhere)) {
-                    if(ChessBoard.getColumn(square) == ChessBoard.getColumn(fromWhere)) {
+                    if(square/10 == fromWhere/10) {
                         needRank = true;
                     } else needFile = true;
                 }
@@ -335,11 +343,11 @@ public class MoveRecorder {
             if(needFile) {
                 return toMoveStringFR(fromWhere, toWhere, whichPiece, capture);
             } else {
-                return toMoveStringR(toWhere, ChessBoard.getRow(fromWhere), whichPiece, capture);
+                return toMoveStringR(toWhere, fromWhere%10, whichPiece, capture);
             }
         } else{ 
             if(needFile) {
-                return toMoveStringF(toWhere, ChessBoard.getColumn(fromWhere), whichPiece, capture);
+                return toMoveStringF(toWhere, fromWhere/10, whichPiece, capture);
             } else {
                 return toMoveString(fromWhere, toWhere, whichPiece, capture);
             }
@@ -399,6 +407,15 @@ public class MoveRecorder {
      */
     public int moves() {
         return moves.size()/2;
+    }
+    
+    /**
+     * int square -> String square
+     * @param square the String square to convert
+     * @return String square
+     */
+    public static String toStringSquare(int square) {
+        return "" + (char)('a' + square/10) + (8 - square%10);
     }
     
     /**
