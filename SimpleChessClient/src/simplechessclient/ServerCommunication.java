@@ -221,12 +221,12 @@ public class ServerCommunication {
                 tc.hit();
                 // MOVEfrom to
                 String[] data = line.substring(4).split(" ");
-                cb.movePiece(data[0], data[1]);
+                cb.movePiece(Integer.parseInt(data[0]), Integer.parseInt(data[1]));
             } else if(line.startsWith("PROMOTE")) {
                 tc.hit();
                 // PROMOTEfrom to whatTo
                 String[] data = line.substring(7).split(" ");
-                cb.promotePiece(data[0], data[1], Integer.parseInt(data[2]));
+                cb.promotePiece(Integer.parseInt(data[0]), Integer.parseInt(data[1]), Integer.parseInt(data[2]));
             }
         }
     }

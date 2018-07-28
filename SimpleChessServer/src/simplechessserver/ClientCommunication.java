@@ -204,20 +204,24 @@ public class ClientCommunication {
                         }
                     } else if(line.startsWith("MOVE") && opponentID != -1) {
                         String[] data = line.substring(4).split(" ");
-                        cb.movePiece(data[0], data[1]);
+                        cb.movePiece(Integer.parseInt(data[0]), 
+                                Integer.parseInt(data[1]));
                         Handler opponent = matchedHandlers.get(opponentID);
                         tc.hit();
                         opponent.tc.hit();
-                        opponent.cb.movePiece(data[0], data[1]);
+                        opponent.cb.movePiece(Integer.parseInt(data[0]), 
+                                Integer.parseInt(data[1]));
                         opponent.out.println(line);
                         opponent.println(line);
                     } else if(line.startsWith("PROMOTE") && opponentID != -1) {
                         String[] data = line.substring(7).split(" ");
-                        cb.promotePiece(data[0], data[1], Integer.parseInt(data[2]));
+                        cb.promotePiece(Integer.parseInt(data[0]), 
+                                Integer.parseInt(data[1]), Integer.parseInt(data[2]));
                         Handler opponent = matchedHandlers.get(opponentID);
                         tc.hit();
                         opponent.tc.hit();
-                        opponent.cb.promotePiece(data[0], data[1], Integer.parseInt(data[2]));
+                        opponent.cb.promotePiece(Integer.parseInt(data[0]), 
+                                Integer.parseInt(data[1]), Integer.parseInt(data[2]));
                         opponent.out.println(line);
                         opponent.println(line);
                     } else if(line.startsWith("PING")) {

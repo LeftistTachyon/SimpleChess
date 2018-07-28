@@ -21,11 +21,11 @@ public class Pawn extends AbstractPiece {
     }
 
     @Override
-    public LinkedList<String> allLegalMoves(ChessBoard cb, String currentPosition) {
+    public LinkedList<Integer> allLegalMoves(ChessBoard cb, int currentPosition) {
         if(!ChessBoard.isValidSquare(currentPosition)) throw new IllegalArgumentException("Invalid square");
         if(cb.getPiece(currentPosition) == null) throw new IllegalArgumentException("This is a null piece");
         if(!(cb.getPiece(currentPosition).getCharRepresentation().equals("P"))) throw new IllegalArgumentException("This isn\'t a pawn! It\'s a " + AbstractPiece.getClassName(cb.getPiece(currentPosition)));
-        LinkedList<String> output = new LinkedList<>();
+        LinkedList<Integer> output = new LinkedList<>();
         int row = ChessBoard.getRow(currentPosition), column = ChessBoard.getColumn(currentPosition);
         if(isWhite) {
             if(row == 0) assert false : "Pawns should have promoted already!";
@@ -42,15 +42,15 @@ public class Pawn extends AbstractPiece {
             }
             if(ChessBoard.isValidSquare(column - 1, row - 1)) {
                 if((!cb.isEmptySquare(column - 1, row - 1) && !cb.getPiece(column - 1, row - 1).isWhite) || 
-                        (cb.getEnPassant() == null?ChessBoard.shiftSquare(currentPosition, -1, -1) == null
-                        :cb.getEnPassant().equals(ChessBoard.shiftSquare(currentPosition, -1, -1)))) {
+                        (cb.getEnPassant() != -1 && 
+                        cb.getEnPassant() == ChessBoard.shiftSquare(currentPosition, -1, -1))) {
                     output.add(ChessBoard.shiftSquare(currentPosition, -1, -1));
                 }
             }
             if (ChessBoard.isValidSquare(column + 1, row - 1)) {
                 if(!cb.isEmptySquare(column + 1, row - 1) && !cb.getPiece(column + 1, row - 1).isWhite || 
-                        (cb.getEnPassant() == null?ChessBoard.shiftSquare(currentPosition, 1, -1) == null
-                        :cb.getEnPassant().equals(ChessBoard.shiftSquare(currentPosition, 1, -1)))) {
+                        (cb.getEnPassant() != -1 && 
+                        cb.getEnPassant() == ChessBoard.shiftSquare(currentPosition, 1, -1))) {
                     output.add(ChessBoard.shiftSquare(currentPosition, 1, -1));
                 }
             }
@@ -69,15 +69,15 @@ public class Pawn extends AbstractPiece {
             }
             if(ChessBoard.isValidSquare(column - 1, row + 1)) {
                 if(!cb.isEmptySquare(column - 1, row + 1) && cb.getPiece(column - 1, row + 1).isWhite 
-                        || (cb.getEnPassant() == null?ChessBoard.shiftSquare(currentPosition, -1, 1) == null
-                        :cb.getEnPassant().equals(ChessBoard.shiftSquare(currentPosition, -1, 1)))) {
+                        || (cb.getEnPassant() != -1 && 
+                        cb.getEnPassant() == ChessBoard.shiftSquare(currentPosition, -1, 1))) {
                     output.add(ChessBoard.shiftSquare(currentPosition, -1, 1));
                 }
             }
             if(ChessBoard.isValidSquare(column + 1, row + 1)) {
                 if(!cb.isEmptySquare(column + 1, row + 1) && cb.getPiece(column + 1, row + 1).isWhite 
-                        || (cb.getEnPassant() == null?ChessBoard.shiftSquare(currentPosition, 1, 1) == null
-                        :cb.getEnPassant().equals(ChessBoard.shiftSquare(currentPosition, 1, 1)))) {
+                        || (cb.getEnPassant() != -1 && 
+                        cb.getEnPassant() == ChessBoard.shiftSquare(currentPosition, 1, 1))) {
                     output.add(ChessBoard.shiftSquare(currentPosition, 1, 1));
                 }
             }
@@ -86,10 +86,10 @@ public class Pawn extends AbstractPiece {
     }
 
     @Override
-    public LinkedList<String> legalCaptures(ChessBoard cb, String currentPosition) {
+    public LinkedList<Integer> legalCaptures(ChessBoard cb, int currentPosition) {
         if(!ChessBoard.isValidSquare(currentPosition)) throw new IllegalArgumentException("Invalid square");
         if(!(cb.getPiece(currentPosition).getCharRepresentation().equals("P"))) throw new IllegalArgumentException("This isn\'t a pawn!");
-        LinkedList<String> output = new LinkedList<>();
+        LinkedList<Integer> output = new LinkedList<>();
         int row = ChessBoard.getRow(currentPosition), column = ChessBoard.getColumn(currentPosition);
         if(isWhite) {
             if(row == 0) assert false : "Pawns should have promoted already!";
