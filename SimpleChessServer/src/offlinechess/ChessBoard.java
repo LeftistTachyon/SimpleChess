@@ -170,16 +170,16 @@ public class ChessBoard {
     
     /**
      * Determines which column a square is referring to<br>
+     * This method can be substituted by {@code /10} to increase speed, but it 
+     * does not check whether the square is legitimate<br>
      * <br>
      * The columns are ordered as such:<br>
      * |_|_|_|_|_|_|_|_|<br>
      * |0 1 2 3 4 5 6 7<br>
      * |a b c d e f g h
      * @param s a square
-     * @deprecated It is encouraged to use /10 instead to increase speed
      * @return which column the String is referring to
      */
-    @Deprecated
     public static int getColumn(int s) {
         if(isValidSquare(s)) {
             return s / 10;
@@ -188,6 +188,8 @@ public class ChessBoard {
     
     /**
      * Determines which row a square is referring to<br>
+     * This method can be substituted by {@code %10} to increase speed, but it 
+     * does not check whether the square is legitimate<br>
      * <br>
      * The rows are ordered as such:<br>
      * ____<br>
@@ -201,11 +203,8 @@ public class ChessBoard {
      * 7 |_<br>
      * ___W
      * @param s the square
-     * @deprecated It is encouraged to use %10 instead of getRow to increase 
-     * speed
      * @return the column / file
      */
-    @Deprecated
     public static int getRow(int s) {
         if(isValidSquare(s)) {
             return s % 10;
