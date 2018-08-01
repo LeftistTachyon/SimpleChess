@@ -1,6 +1,6 @@
 # SimpleChess
 This project is the next iteration of my chess project.  
-### This branch  
+### Master branch  
 This branch is the main branch.  
 ## Getting started  
 Please take a look at our [contributing guidlines](../master/CONTRIBUTING.md) and our [Contributor Code of Conduct](../master/CODE_OF_CONDUCT.md).  
