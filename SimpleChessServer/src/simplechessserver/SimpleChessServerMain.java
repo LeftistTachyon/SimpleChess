@@ -3,6 +3,7 @@ package simplechessserver;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.ServerSocket;
+import simplechessserver.ClientCommunication.Handler;
 
 /**
  * The Main class
@@ -16,9 +17,15 @@ public class SimpleChessServerMain {
      */
     public static void main(String[] args) throws IOException {
         System.out.println("The chess server is running.");
+        
+        MainWindow mw = new MainWindow();
+        Handler.setMainWindow(mw);
+        
         try(ServerSocket listener = new ServerSocket(ClientCommunication.PORT)) {
             while(true) {
-                new ClientCommunication.Handler(listener.accept()).start();
+                Handler h = new Handler(listener.accept());
+                h.start();
+                mw.addHandler(h);
             }
         } catch(BindException be) {
             System.err.println("Cannot start server: " + be.getMessage());

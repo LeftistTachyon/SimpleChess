@@ -1,6 +1,7 @@
 package simplechessserver;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -54,7 +55,7 @@ public class ClientCommunication {
      * loop and are responsible for a dealing with a single client
      * and broadcasting its messages.
      */
-    static class Handler extends Thread implements Comparable<Handler> {
+    public static class Handler extends Thread implements Comparable<Handler> {
         /**
          * This client's name
          */
@@ -63,7 +64,7 @@ public class ClientCommunication {
         /**
          * This client's socket
          */
-        private Socket socket;
+        public final Socket socket;
         
         /**
          * Messaging to here
@@ -96,10 +97,23 @@ public class ClientCommunication {
         private int side = 0;
         
         /**
+         * An ArrayList of EventListeners listening in on this object
+         */
+        private ActionListener listener = null;
+        
+        /**
+         * The MainWindow that displays all of the Handlers.
+         */
+        private static MainWindow mainWindow = null;
+        
+        /**
          * Constructs a handler thread, squirreling away the socket.
          * All the interesting work is done in the run method.
+         * @param socket the socket that receives info from the client
          */
         public Handler(Socket socket) {
+            System.out.println(socket.toString() + " " + 
+                    socket.getInetAddress().toString());
             this.socket = socket;
             cb = new ChessBoard();
             cb.recalculateMoves();
@@ -126,8 +140,9 @@ public class ClientCommunication {
                 // must be done while locking the set of names.
                 while(true) {
                     out.println("SUBMITNAME");
-                    println("SUBMITNAME");
+                    notify("SUBMITNAME", false);
                     name = in.readLine();
+                    notify(name, true);
                     if(name == null) return;
                     if("".equals(name) || "null".equals(name)) continue;
                     synchronized(names) {
@@ -142,12 +157,13 @@ public class ClientCommunication {
                 // socket's print writer to the set of all writers so
                 // this client can receive broadcast messages.
                 out.println("NAMEACCEPTED");
-                println("NAMEACCEPTED");
+                notify("NAMEACCEPTED", false);
 
                 // Accept messages from this client and broadcast them.
                 // Ignore other clients that cannot be broadcasted to.
                 while(true) {
                     String line = in.readLine();
+                    notify(line, true);
                     if(line == null) {
                         return;
                     }
@@ -182,17 +198,17 @@ public class ClientCommunication {
                                 });
                                 if(Math.random() < 0.5) {
                                     one.out.println("STARTGAMEtrue " + two.name);
-                                    one.println("STARTGAMEtrue " + two.name);
+                                    one.notify("STARTGAMEtrue " + two.name, false);
                                     one.side = 1;
                                     two.out.println("STARTGAMEfalse " + one.name);
-                                    two.println("STARTGAMEfalse " + one.name);
+                                    two.notify("STARTGAMEfalse " + one.name, false);
                                     two.side = -1;
                                 } else {
                                     one.out.println("STARTGAMEfalse " + two.name);
-                                    one.println("STARTGAMEfalse " + two.name);
+                                    one.notify("STARTGAMEfalse " + two.name, false);
                                     one.side = -1;
                                     two.out.println("STARTGAMEtrue " + one.name);
-                                    two.println("STARTGAMEtrue " + one.name);
+                                    two.notify("STARTGAMEtrue " + one.name, false);
                                     two.side = 1;
                                 }
                                 one.tc.start();
@@ -212,7 +228,7 @@ public class ClientCommunication {
                         opponent.cb.movePiece(Integer.parseInt(data[0]), 
                                 Integer.parseInt(data[1]));
                         opponent.out.println(line);
-                        opponent.println(line);
+                        opponent.notify(line, false);
                     } else if(line.startsWith("PROMOTE") && opponentID != -1) {
                         String[] data = line.substring(7).split(" ");
                         cb.promotePiece(Integer.parseInt(data[0]), 
@@ -223,9 +239,10 @@ public class ClientCommunication {
                         opponent.cb.promotePiece(Integer.parseInt(data[0]), 
                                 Integer.parseInt(data[1]), Integer.parseInt(data[2]));
                         opponent.out.println(line);
-                        opponent.println(line);
+                        opponent.notify(line, false);
                     } else if(line.startsWith("PING")) {
                         out.println("PING");
+                        notify("PING", false);
                     }
                     //message = "ENDGAME0 aborted"
                     if(cb.insufficientMaterial()){
@@ -256,9 +273,12 @@ public class ClientCommunication {
                 Handler opponent = matchedHandlers.get(opponentID);
                 if(opponent != null) {
                     opponent.out.println(message);
-                    opponent.println(message);
+                    opponent.notify(message, false);
                     opponent.tc.stop();
                     opponent.reset();
+                }
+                if(mainWindow != null) {
+                    mainWindow.removeHandler(this);
                 }
                 if(tc != null) {
                     tc.stop();
@@ -309,10 +329,10 @@ public class ClientCommunication {
             Handler opponent = matchedHandlers.get(opponentID);
             if(opponent != null) {
                 opponent.out.println(message);
-                opponent.println(message);
+                opponent.notify(message, false);
             }
             out.println(message);
-            println(message);
+            notify(message, false);
             if(opponent != null) opponent.reset();
             reset();
         }
@@ -324,7 +344,71 @@ public class ClientCommunication {
             tc.stop();
             matchedHandlers.remove(opponentID);
             opponentID = -1;
+            side = 0;
             cb = new ChessBoard();
+        }
+        
+        /**
+         * Sets the listening ActionListener to the one given
+         * @param al the ActionListener to use to listen
+         */
+        public void setActionListener(ActionListener al) {
+            listener = al;
+        }
+        
+        /**
+         * Clears the listening ActionListener so it isn't listening anymore
+         */
+        public void clearActionListener() {
+            listener = null;
+        }
+        
+        /**
+         * Notifies the listener that an event happened
+         * @param s the command
+         * @param isIn whether the message is inbound or outbound
+         */
+        public void notify(String s, boolean isIn) {
+            if(listener != null) {
+                String tag = (isIn)?name + ": ":"SERVER: ";
+                listener.actionPerformed(new ActionEvent(this, 1, tag + s));
+            }
+        }
+
+        /**
+         * Sets the MainWindow
+         * @param mainWindow which MainWindow to use to show every Handler
+         */
+        public static void setMainWindow(MainWindow mainWindow) {
+            Handler.mainWindow = mainWindow;
+        }
+
+        /**
+         * Returns the client's name
+         * @return the client's name
+         */
+        public String getClientName() {
+            return name;
+        }
+
+        /**
+         * Returns which side of a game this client is in, if any.
+         * @return the current game status of this client
+         */
+        public int getSide() {
+            return side;
+        }
+        
+        /**
+         * Determines the opponent's name, if in a game.
+         * @return the opponent's name, or null if this user is unpaired.
+         */
+        public String getOpponentName() {
+            if(opponentID == -1) {
+                return null;
+            } else {
+                return matchedHandlers.get(opponentID).name;
+            }
         }
     }
 }

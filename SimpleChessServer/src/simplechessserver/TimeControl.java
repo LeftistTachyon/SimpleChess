@@ -42,7 +42,7 @@ public class TimeControl implements Runnable {
     /**
      * The lock on white grace time
      */
-    private final Object WHITE_TIME_LOCK = new Object();
+    private final Object WHITE_LOCK = new Object();
     
     /**
      * The amount of grace time black has
@@ -52,7 +52,7 @@ public class TimeControl implements Runnable {
     /**
      * The lock on black grace time
      */
-    private final Object BLACK_TIME_LOCK = new Object();
+    private final Object BLACK_LOCK = new Object();
     
     /**
      * Whose turn it is
@@ -98,12 +98,12 @@ public class TimeControl implements Runnable {
      */
     public void hit() {
         if(turn) {
-            synchronized(WHITE_TIME_LOCK) {
+            synchronized(WHITE_LOCK) {
                 whiteTime += increment;
                 whiteGraceTime = 0;
             }
         } else {
-            synchronized(BLACK_TIME_LOCK) {
+            synchronized(BLACK_LOCK) {
                 blackTime += increment;
                 blackGraceTime = 0;
             }
@@ -134,7 +134,7 @@ public class TimeControl implements Runnable {
     public void run() {
         while(inGame) {
             if(turn) {
-                synchronized(WHITE_TIME_LOCK) {
+                synchronized(WHITE_LOCK) {
                     if(whiteGraceTime <= 0) {
                         // whiteTime -= 0.1;
                         if (whiteTime > 0) {
@@ -147,7 +147,7 @@ public class TimeControl implements Runnable {
                     }
                 }
             } else {
-                synchronized(BLACK_TIME_LOCK) {
+                synchronized(BLACK_LOCK) {
                     if(blackGraceTime <= 0) {
                         if (blackTime > 0) {
                             blackTime -= 0.1;
@@ -171,11 +171,11 @@ public class TimeControl implements Runnable {
      * Resets the clock
      */
     public void reset() {
-        synchronized(WHITE_TIME_LOCK) {
+        synchronized(WHITE_LOCK) {
             whiteTime = startingSeconds;
             whiteGraceTime = graceTime;
         }
-        synchronized(BLACK_TIME_LOCK) {
+        synchronized(BLACK_LOCK) {
             blackTime = startingSeconds;
             blackGraceTime = graceTime;
         }
