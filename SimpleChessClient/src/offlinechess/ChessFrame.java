@@ -2,6 +2,7 @@ package offlinechess;
 
 import java.awt.Dimension;
 import javax.swing.JFrame;
+import simplechessclient.GameWindows;
 
 /**
  * A Frame for the application
@@ -23,7 +24,8 @@ public class ChessFrame extends JFrame {
         setSize(new Dimension(535, 560));
         super.getContentPane().add(cp);
         super.setResizable(false);
-        super.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        super.addWindowListener(GameWindows.CLOSE_CONFIRMATION_WA);
+        super.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         super.setVisible(true);
         cp.start();
     }

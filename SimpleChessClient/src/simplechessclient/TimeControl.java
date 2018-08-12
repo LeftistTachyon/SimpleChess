@@ -43,7 +43,7 @@ public class TimeControl implements Runnable {
     /**
      * The lock for white grace time
      */
-    private final Object WHITE_GRACE_LOCK = new Object();
+    private final Object WHITE_LOCK = new Object();
     
     /**
      * The amount of grace time black has
@@ -53,7 +53,7 @@ public class TimeControl implements Runnable {
     /**
      * The lock for black grace time
      */
-    private final Object BLACK_GRACE_LOCK = new Object();
+    private final Object BLACK_LOCK = new Object();
     
     /**
      * Whose turn it is
@@ -101,7 +101,7 @@ public class TimeControl implements Runnable {
     public void hit() {
         if(turn) {
             // whiteTime += increment;
-            synchronized(WHITE_GRACE_LOCK) {
+            synchronized(WHITE_LOCK) {
                 whiteTime += increment;
                 if(whiteGraceTime != 0)
                     notifyActionListeners("NOGRACEtrue");
@@ -109,7 +109,7 @@ public class TimeControl implements Runnable {
             }
         } else {
             // blackTime += increment;
-            synchronized(BLACK_GRACE_LOCK) {
+            synchronized(BLACK_LOCK) {
                 blackTime += increment;
                 if(blackGraceTime != 0)
                     notifyActionListeners("NOGRACEfalse");
@@ -133,7 +133,7 @@ public class TimeControl implements Runnable {
     @Override
     public void run() {
         if(turn) {
-            synchronized(WHITE_GRACE_LOCK) {
+            synchronized(WHITE_LOCK) {
                 if(whiteGraceTime <= 0) {
                     // whiteTime -= 0.1;
                     if (whiteTime > 0) {
@@ -151,7 +151,7 @@ public class TimeControl implements Runnable {
                 }
             }
         } else {
-            synchronized(BLACK_GRACE_LOCK) {
+            synchronized(BLACK_LOCK) {
                 if(blackGraceTime <= 0) {
                     // blackTime -= 0.1;
                     if (blackTime > 0) {
@@ -175,13 +175,30 @@ public class TimeControl implements Runnable {
      * Resets the clock
      */
     public void reset() {
-        synchronized(WHITE_GRACE_LOCK) {
+        synchronized(WHITE_LOCK) {
             whiteTime = startingSeconds;
             whiteGraceTime = graceTime;
         }
-        synchronized(BLACK_GRACE_LOCK) {
+        synchronized(BLACK_LOCK) {
             blackTime = startingSeconds;
             blackGraceTime = graceTime;
+        }
+    }
+    
+    /**
+     * Returns the amount of grace time left for this side
+     * @param isWhite which side to check
+     * @return the amount of grace time left
+     */
+    public int getGraceTime(boolean isWhite) {
+        if(isWhite) {
+            synchronized(WHITE_LOCK) {
+                return (int) whiteGraceTime;
+            }
+        } else {
+            synchronized(BLACK_LOCK) {
+                return (int) blackGraceTime;
+            }
         }
     }
 

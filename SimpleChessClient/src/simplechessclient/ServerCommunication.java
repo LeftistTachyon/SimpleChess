@@ -1,5 +1,6 @@
 package simplechessclient;
 
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
@@ -57,6 +58,9 @@ public class ServerCommunication {
     public ServerCommunication() throws IOException {
         try {
             cf = new ChessFrame();
+            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+            cf.setLocation((screenSize.width - cf.getWidth())/2, 
+                    (screenSize.height - cf.getHeight())/2);
             cb = cf.getChessPanel().getChessBoard();
             cb.addActionListener((ActionEvent e) -> {
                 String message = e.getActionCommand();
@@ -127,7 +131,15 @@ public class ServerCommunication {
         String _name = null;
         
         while(true) {
-            String line = in.readLine();
+            String line = null; 
+            try {
+                line = in.readLine();
+            } catch (IOException ioe) {
+                JOptionPane.showMessageDialog(cf, 
+                        "You have been disconnected from the server.", 
+                        "Disconnected", JOptionPane.WARNING_MESSAGE);
+                System.exit(0);
+            }
             if(line == null) {
                 return;
             }
@@ -173,11 +185,11 @@ public class ServerCommunication {
                 // data[1] will be other person's name
                 Point cfLocation = cf.getLocation();
                 GameWindows.NameAndTimeWindow youFrame = GameWindows.showNameAndTimeWindow(_name, true, tc, cb.getPerspective());
-                youFrame.setLocation(cfLocation.x - 20 - youFrame.getWidth(), 
+                youFrame.setLocation(cfLocation.x + 20 + cf.getWidth(), 
                         cfLocation.y + cf.getHeight() - youFrame.getHeight());
                 gameFrames.add(youFrame);
                 GameWindows.NameAndTimeWindow theirFrame = GameWindows.showNameAndTimeWindow(data[1], false, tc, !cb.getPerspective());
-                theirFrame.setLocation(cfLocation.x - 20 - theirFrame.getWidth(), 
+                theirFrame.setLocation(cfLocation.x + 20 + cf.getWidth(), 
                         cfLocation.y);
                 gameFrames.add(theirFrame);
                 tc.addActionListener((ActionEvent ae) -> {
@@ -251,7 +263,7 @@ public class ServerCommunication {
         do {
             s = JOptionPane.showInputDialog(
                 cf,
-                    again?"Choose a screen name (no spaces):":"Choose a screen name (not the same name)(no spaces):",
+                    again?"Choose a screen name (no spaces):":"Choose a different screen name (no spaces):",
                 "Screen name selection",
                 JOptionPane.PLAIN_MESSAGE);
             if(s == null) System.exit(0);

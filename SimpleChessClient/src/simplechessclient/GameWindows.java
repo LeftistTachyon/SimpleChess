@@ -4,12 +4,14 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javax.swing.GroupLayout;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.LayoutStyle;
@@ -22,6 +24,22 @@ import javax.swing.WindowConstants;
  * @author Jed Wang
  */
 public class GameWindows {
+    /**
+     * This WindowAdapter attaches to a window and shows a JOptionPanel that 
+     * confirms whether the client wants to close the window.
+     */
+    public static final WindowAdapter CLOSE_CONFIRMATION_WA = new WindowAdapter() {
+        @Override
+        public void windowClosing(WindowEvent e) {
+            String[] options = {"Yes", "No"};
+            int selection = JOptionPane.showOptionDialog(null, 
+                    "Are you sure you want to exit?", "Exit confirmation", 
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, 
+                    null, options, options[1]);
+            if(selection == 0) System.exit(0);
+        }
+    };
+    
     //<editor-fold defaultstate="collapsed" desc="TimeWindow class and show method">
     /**
      * A Window that contains the time control of the game.
@@ -250,18 +268,24 @@ public class GameWindows {
             bottomSeparator = new JSeparator();
             graceLabel = new JLabel();
             
-            tc.addChangeListener((ChangeListener) (ObservableValue observable, Object oldValue, Object newValue) -> {
+            tc.addChangeListener((ChangeListener) (ObservableValue observable, 
+                    Object oldValue, Object newValue) -> {
                 timeLabel.setText(tc.toString(!isWhite));
+                if(bottomPanel.isVisible())
+                    graceLabel.setText("You have "+ tc.getGraceTime(!isWhite) + 
+                            " seconds to make your first move.");
             });
             tc.addActionListener((ActionEvent e) -> {
                 if(e.getActionCommand().startsWith("NOGRACE")) {
                     boolean noGrace = Boolean.parseBoolean(e.getActionCommand().substring(7));
-                    if(noGrace != isWhite)
+                    if(noGrace != isWhite || tc.getGraceTime(!isWhite) != 0) {
                         bottomPanel.setVisible(!bottomPanel.isVisible());
+                    }
                 }
             });
             
-            setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+            setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
+            addWindowListener(CLOSE_CONFIRMATION_WA);
             setTitle("Player Info");
             setResizable(false);
             
@@ -278,7 +302,8 @@ public class GameWindows {
             
             graceLabel.setFont(new Font("Segoe UI", 0, 11)); // NOI18N
             graceLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            graceLabel.setText("You have 15 seconds to make your first move.");
+            graceLabel.setText("You have "+ tc.getGraceTime(!isWhite) + 
+                    " seconds to make your first move.");
             graceLabel.setToolTipText("Grace time");
             
             GroupLayout jPanel1Layout = new GroupLayout(bottomPanel);
@@ -330,6 +355,8 @@ public class GameWindows {
             );
             
             pack();
+            
+            bottomPanel.setVisible(isWhite);
         }// </editor-fold>
         
         /**
