@@ -2,8 +2,8 @@ package offlinechess;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.LinkedList;
 import javax.imageio.ImageIO;
 
@@ -125,11 +125,9 @@ public class Knight extends AbstractPiece {
      * @param w the white image
      * @throws IOException if something goes wrong
      */
-    public static void loadImages(URL b, URL w) throws IOException {
+    public static void loadImages(File b, File w) throws IOException {
         white = ImageIO.read(w);
         black = ImageIO.read(b);
-        whiteGhost = ghostify(white);
-        blackGhost = ghostify(black);
     }
     
     /**
@@ -146,27 +144,6 @@ public class Knight extends AbstractPiece {
             g.drawImage(white, x, y, width, height, null);
         } else {
             g.drawImage(black, x, y, width, height, null);
-        }
-    }
-    /**
-     * The images for the black and white ghosts
-     */
-    private static BufferedImage blackGhost, whiteGhost;
-    
-    /**
-     * Draws a ghost of this image
-     * @param g the Graphics to draw on
-     * @param x the X coordinate of the image
-     * @param y the Y coordinate of the image
-     * @param width the width of the picture
-     * @param height the height of the picture
-     */
-    @Override
-    public void drawGhost(Graphics g, int x, int y, int width, int height) {
-        if(isWhite) {
-            g.drawImage(whiteGhost, x, y, width, height, null);
-        } else {
-            g.drawImage(blackGhost, x, y, width, height, null);
         }
     }
     

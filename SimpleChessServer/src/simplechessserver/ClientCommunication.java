@@ -112,8 +112,6 @@ public class ClientCommunication {
          * @param socket the socket that receives info from the client
          */
         public Handler(Socket socket) {
-            System.out.println(socket.toString() + " " + 
-                    socket.getInetAddress().toString());
             this.socket = socket;
             cb = new ChessBoard();
             cb.recalculateMoves();
@@ -174,7 +172,6 @@ public class ClientCommunication {
                         unmatched.add(this);
                         if(unmatched.size() >= 2) {
                             synchronized(MATCH_LOCK) {
-                            synchronized(unmatched) {
                                 Handler one = unmatched.remove(), two = unmatched.remove();
                                 int iD = matchedHandlers.size();
                                 matchedHandlers.put(iD, one);
@@ -215,7 +212,6 @@ public class ClientCommunication {
                                 two.tc.start();
                                 one.cb.recalculateMoves();
                                 two.cb.recalculateMoves();
-                            }
                             }
                         }
                     } else if(line.startsWith("MOVE") && opponentID != -1) {
@@ -409,6 +405,22 @@ public class ClientCommunication {
             } else {
                 return matchedHandlers.get(opponentID).name;
             }
+        }
+
+        /**
+         * Returns this Handler's virtual chess board
+         * @return this Handler's chess board
+         */
+        public ChessBoard getChessBoard() {
+            return cb;
+        }
+        
+        /**
+         * Returns this Handler's virtual chess clock
+         * @return this Handler's TimeControl
+         */
+        public TimeControl getTimeControl() {
+            return tc;
         }
     }
 }

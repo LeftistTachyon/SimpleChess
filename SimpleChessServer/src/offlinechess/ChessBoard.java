@@ -1,5 +1,7 @@
 package offlinechess;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -47,6 +49,10 @@ public class ChessBoard {
      */
     private HashMap<String, Integer> positions;
     
+    static {
+        initImages();
+    }
+    
     /**
      * Default constructor.
      */
@@ -57,6 +63,53 @@ public class ChessBoard {
         mr = new MoveRecorder();
         allLegalMoves = new HashMap<>();
         positions = new HashMap<>();
+    }
+    
+    /**
+     * Initializes the images
+     */
+    private static void initImages() {
+        try {
+            Bishop.loadImages(new File("src/images/blackBishop.png"), new File("src/images/whiteBishop.png"));
+        } catch(IOException e) {
+            System.err.println("Could not find Bishop file images");
+            System.exit(1); 
+        }
+        
+        try {
+            King.loadImages(new File("src/images/blackKing.png"), new File("src/images/whiteKing.png"));
+        } catch(IOException e) {
+            System.err.println("Could not find King file images");
+            System.exit(1); 
+        }
+        
+        try {
+            Knight.loadImages(new File("src/images/blackKnight.png"), new File("src/images/whiteKnight.png"));
+        } catch(IOException e) {
+            System.err.println("Could not find Knight file images");
+            System.exit(1); 
+        }
+        
+        try {
+            Pawn.loadImages(new File("src/images/blackPawn.png"), new File("src/images/whitePawn.png"));
+        } catch(IOException e) {
+            System.err.println("Could not find Pawn file images");
+            System.exit(1); 
+        }
+        
+        try {
+            Queen.loadImages(new File("src/images/blackQueen.png"), new File("src/images/whiteQueen.png"));
+        } catch(IOException e) {
+            System.err.println("Could not find Queen file images");
+            System.exit(1); 
+        }
+        
+        try {
+            Rook.loadImages(new File("src/images/blackRook.png"), new File("src/images/whiteRook.png"));
+        } catch(IOException e) {
+            System.err.println("Could not find Rook file images");
+            System.exit(1); 
+        }
     }
     
     /**

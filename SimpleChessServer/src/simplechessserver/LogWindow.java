@@ -50,7 +50,7 @@ public class LogWindow extends JFrame {
         });
 
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("Simple Chess Server");
+        setTitle("Log for " + handler.getClientName());
         addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent e) {

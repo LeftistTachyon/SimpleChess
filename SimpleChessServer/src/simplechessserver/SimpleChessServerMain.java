@@ -3,6 +3,7 @@ package simplechessserver;
 import java.io.IOException;
 import java.net.BindException;
 import java.net.ServerSocket;
+import javax.swing.JOptionPane;
 import simplechessserver.ClientCommunication.Handler;
 
 /**
@@ -29,6 +30,9 @@ public class SimpleChessServerMain {
             }
         } catch(BindException be) {
             System.err.println("Cannot start server: " + be.getMessage());
+            JOptionPane.showMessageDialog(mw, "Cannot start server", 
+                    be.getMessage(), JOptionPane.ERROR_MESSAGE);
+            System.exit(1);
         }
     }
 }

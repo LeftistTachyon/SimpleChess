@@ -20,6 +20,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollBar;
 import javax.swing.LayoutStyle;
+import offlinechess.AbstractPiece;
 import simplechessserver.ClientCommunication.Handler;
 
 /**
@@ -41,7 +42,7 @@ public class MainWindow extends JFrame {
         handlers = new ArrayList<>();
         DrawPanel dp = new DrawPanel();
         
-        super.setPreferredSize(new Dimension(500, 600));
+        super.setPreferredSize(new Dimension(750, 500));
         super.setResizable(true);
         super.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
@@ -123,7 +124,7 @@ public class MainWindow extends JFrame {
         /**
          * Whether a bar is opening
          */
-        private boolean opening = true;
+        private boolean opening = false;
         
         /**
          * The height of the quick info bar for each user
@@ -145,8 +146,35 @@ public class MainWindow extends JFrame {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     Point p = e.getPoint();
-                    if(p.y >= getWidth() - 40 && p.y <= getWidth() - 10) {
-                        
+                    if(open != -1 && p.x >= 15 && p.x <= 140) {
+                        int extra = (int) ((FULL_INFO_HEIGHT / animationFrames) 
+                                * animation), 
+                                baseY = QUICK_INFO_HEIGHT*open+
+                                        QUICK_INFO_HEIGHT+extra-35;
+                        if(p.y >= baseY && p.y <= baseY + 25) {
+                            LogWindow.run(handlers.get(open));
+                        }
+                    } else if(p.x >= getWidth() - 40 && p.x <= getWidth() - 10) {
+                        int extra;/* = (open == -1)?0: 0;*/
+                        if(open == -1) {
+                            extra = 0;
+                        } else {
+                            if(p.y < QUICK_INFO_HEIGHT*open+QUICK_INFO_HEIGHT) {
+                                extra = 0;
+                            } else if(p.y > QUICK_INFO_HEIGHT*open+
+                                    QUICK_INFO_HEIGHT+
+                                    (int) ((FULL_INFO_HEIGHT / animationFrames) 
+                                    * animation)) {
+                                extra = (int) ((FULL_INFO_HEIGHT / animationFrames) 
+                                    * animation);
+                            } else {
+                                return;
+                            }
+                        }
+                        int mod = (p.y - extra) % QUICK_INFO_HEIGHT;
+                        if(mod >= 25 && mod <= 55) {
+                            toggleOpen((p.y - extra) / QUICK_INFO_HEIGHT);
+                        }
                     }
                 }
             });
@@ -190,7 +218,7 @@ public class MainWindow extends JFrame {
                     RenderingHints.VALUE_ANTIALIAS_ON);
             g2D.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, 
                     RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-            final Font[] fonts = {new Font("Consolas", 0, 10), 
+            final Font[] fonts = {new Font("Consolas", 0, 12), 
                 new Font("Consolas", 0, 20), new Font("Consolas", 0, 30)};
             
             BasicStroke defaultStroke = new BasicStroke(2, 
@@ -210,10 +238,12 @@ public class MainWindow extends JFrame {
                         getWidth(), QUICK_INFO_HEIGHT*i + QUICK_INFO_HEIGHT + add);
                 
                 g2D.setFont(fonts[2]);
-                g2D.drawString(h.getClientName(), 10, QUICK_INFO_HEIGHT*i+40+add);
+                String clientName = h.getClientName();
+                g2D.drawString((clientName == null)?"":clientName, 10, 
+                        QUICK_INFO_HEIGHT*i+40+add);
                 
                 g2D.setFont(fonts[1]);
-                g2D.drawString(h.socket.getInetAddress().toString(), 10, 
+                g2D.drawString(h.socket.getInetAddress().getHostAddress(), 10, 
                         QUICK_INFO_HEIGHT*i+70+add);
                 
                 final int[] x = {getWidth() - 33, getWidth() - 25, 
@@ -255,8 +285,8 @@ public class MainWindow extends JFrame {
                             QUICK_INFO_HEIGHT*i+47+add};
                 
                 if(i == open) {
-                    double multDown = animation / animationFrames, 
-                            multUp = 1 - multDown;
+                    double multUp = animation / animationFrames, 
+                            multDown = 1 - multUp;
                     int[] y = new int[3];
                     for(int j = 0; j < y.length; j++) {
                         y[j] = (int) (y_down[j] * multDown + y_up[j] * multUp);
@@ -268,6 +298,8 @@ public class MainWindow extends JFrame {
                     g2D.setColor(Color.BLACK);
                     g2D.drawPolygon(tri);
                     if(animation == 10) {
+                        g2D.setFont(fonts[0]);
+                        
                         // Write out info
                         String s1;
                         switch(h.getSide()) {
@@ -285,8 +317,63 @@ public class MainWindow extends JFrame {
                             default:
                                 throw new IllegalStateException("Handler.side should be either 1, 0, or -1.");
                         }
-                        g2D.drawString(s1, QUICK_INFO_HEIGHT, i);
+                        g2D.drawString(s1, 15, QUICK_INFO_HEIGHT*i+QUICK_INFO_HEIGHT+20);
+                        
+                        String s2 = "";
+                        byte[] address = h.socket.getInetAddress().getAddress();
+                        for(int j = 0; j < address.length; j++) {
+                            s2 += address[j];
+                            if(j != address.length - 1) {
+                                s2 += ".";
+                            }
+                        }
+                        g2D.drawString("IP: " + s2 + " - " + h.socket.getInetAddress().getHostAddress(), 
+                                15, QUICK_INFO_HEIGHT*i+QUICK_INFO_HEIGHT+40);
+                        
+                        Point tl = new Point(15, 
+                                QUICK_INFO_HEIGHT*i+QUICK_INFO_HEIGHT+extraSpace-35), 
+                                br = new Point(tl.x+125, tl.y+25);
+                        g2D.setPaint(new GradientPaint(tl, Color.LIGHT_GRAY, br, Color.GRAY));
+                        g2D.fillRect(tl.x, tl.y, 125, 25);
+                        g2D.setColor(Color.BLACK);
+                        g2D.drawString("Open log window", 22.5f, 
+                                QUICK_INFO_HEIGHT*i+QUICK_INFO_HEIGHT+
+                                        extraSpace-17.5f);
+                        
+                        if(h.getSide() != 0) {
+                            final int SQ = 20;
+                            int baseY = QUICK_INFO_HEIGHT*i+QUICK_INFO_HEIGHT+10, 
+                                    baseX = getWidth() - 8*SQ - 10;
+                            
+                            g2D.setColor(new Color(181, 136, 99));
+                            g2D.fillRect(baseX, baseY, 8*SQ, 8*SQ);
+                            g2D.setColor(new Color(240, 217, 181));
+                            for(int j = baseX;j<8*SQ+baseX;j+=SQ*2) {
+                                for(int k = baseY;k<8*SQ+baseY;k+=SQ*2) {
+                                    g2D.fillRect(j, k, SQ, SQ);
+                                    g2D.fillRect(j+SQ, k+SQ, SQ, SQ);
+                                }
+                            }
+                            
+                            AbstractPiece[][] board = h.getChessBoard().getBoard();
+                            for(int r = 0; r < board.length; r++) {
+                                for(int c = 0; c < board[r].length; c++) {
+                                    if(board[r][c] == null) continue;
+                                    board[r][c].draw(g2D, 20*r+baseX, 
+                                            20*c+baseY, 20, 20);
+                                }
+                            }
+                            
+                            TimeControl tc = h.getTimeControl();
+                            g2D.setFont(fonts[1]);
+                            g2D.setColor(Color.BLACK);
+                            g2D.drawString(tc.toString(), baseX, baseY+8*SQ+25);
+                        }
                     }
+                    
+                    g2D.setColor(Color.BLACK);
+                    g2D.drawLine(0, QUICK_INFO_HEIGHT*i+QUICK_INFO_HEIGHT+extraSpace, 
+                            getWidth(), QUICK_INFO_HEIGHT*i+QUICK_INFO_HEIGHT+extraSpace);
                 } else {
                     // standard triangle
                     Polygon tri = new Polygon(x, y_down, 3);
@@ -305,6 +392,20 @@ public class MainWindow extends JFrame {
             if(animation == 0) {
                 open = -1;
             }
+        }
+        
+        /**
+         * Toggles opening a window describing the client
+         * @param client which client to toggle
+         */
+        public void toggleOpen(int client) {
+            open = client;
+            if(animation == 0) {
+                animation++;
+            } else if(animation == 10) {
+                animation--;
+            }
+            opening = !opening;
         }
 
         /**
@@ -332,7 +433,7 @@ public class MainWindow extends JFrame {
             while(true) {
                 repaint();
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(40);
                 } catch (InterruptedException ex) {
                     System.err.println("Thread was interrupted");
                 }

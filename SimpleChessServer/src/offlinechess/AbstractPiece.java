@@ -16,7 +16,7 @@ public abstract class AbstractPiece {
     /**
      * Whether or not the piece is white
      */
-    protected final boolean isWhite;
+    public final boolean isWhite;
     
     /**
      * Creates a new AbstractPiece
@@ -121,8 +121,6 @@ public abstract class AbstractPiece {
     public static void loadImages(URL b, URL w) throws IOException {
         white = ImageIO.read(w);
         black = ImageIO.read(b);
-        whiteGhost = ghostify(white);
-        blackGhost = ghostify(black);
     }
     
     /**
@@ -138,36 +136,6 @@ public abstract class AbstractPiece {
             g.drawImage(white, x, y, width, height, null);
         } else {
             g.drawImage(black, x, y, width, height, null);
-        }
-    }
-    
-    /**
-     * The images for the black and white ghosts
-     */
-    private static BufferedImage blackGhost, whiteGhost;
-    
-    /**
-     * Turns the alpha of the image to 30%
-     * @param bi the BufferedImage to change
-     * @return the changed image
-     */
-    public static BufferedImage ghostify(BufferedImage bi) {
-        return rop.filter(bi, null);
-    }
-    
-    /**
-     * Draws a ghost of this image
-     * @param g the Graphics to draw on
-     * @param x the X coordinate of the image
-     * @param y the Y coordinate of the image
-     * @param width the width of the picture
-     * @param height the height of the picture
-     */
-    public void drawGhost(Graphics g, int x, int y, int width, int height) {
-        if(isWhite) {
-            g.drawImage(whiteGhost, x, y, width, height, null);
-        } else {
-            g.drawImage(blackGhost, x, y, width, height, null);
         }
     }
     
