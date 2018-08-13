@@ -16,7 +16,7 @@ public abstract class AbstractPiece {
     /**
      * Whether or not the piece is white
      */
-    protected final boolean isWhite;
+    public final boolean isWhite;
     
     /**
      * Creates a new AbstractPiece

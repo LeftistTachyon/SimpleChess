@@ -2,8 +2,8 @@ package offlinechess;
 
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.util.LinkedList;
 import javax.imageio.ImageIO;
 
@@ -110,7 +110,7 @@ public class Bishop extends AbstractPiece {
      * @param w the white image
      * @throws IOException if something goes wrong
      */
-    public static void loadImages(URL b, URL w) throws IOException {
+    public static void loadImages(File b, File w) throws IOException {
         white = ImageIO.read(w);
         black = ImageIO.read(b);
         whiteGhost = ghostify(white);

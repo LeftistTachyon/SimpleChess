@@ -9,7 +9,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ConnectException;
+import java.net.NoRouteToHostException;
 import java.net.Socket;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -105,7 +107,7 @@ public class ServerCommunication {
             serverAddress = getServerAddress();
             try {
                 socket = new Socket(serverAddress, 9001);
-            } catch (ConnectException | UnknownHostException ex) {
+            } catch (ConnectException | NoRouteToHostException | UnknownHostException ex) {
                 //JOptionPane.showMessageDialog(cf, ex.getMessage(),
                 //        "Connection Error", JOptionPane.ERROR_MESSAGE);
                 Object[] options = {"Reenter IP Adress", "Exit"};
@@ -134,7 +136,7 @@ public class ServerCommunication {
             String line = null; 
             try {
                 line = in.readLine();
-            } catch (IOException ioe) {
+            } catch (SocketException se) {
                 JOptionPane.showMessageDialog(cf, 
                         "You have been disconnected from the server.", 
                         "Disconnected", JOptionPane.WARNING_MESSAGE);

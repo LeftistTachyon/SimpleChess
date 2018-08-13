@@ -12,6 +12,7 @@ import java.awt.event.ActionListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -142,6 +143,10 @@ public class ChessBoard {
      */
     public static final int TEXT_SIZE = 12;
     
+    static {
+        initImages();
+    }
+    
     /**
      * Default constructor.
      */
@@ -162,44 +167,44 @@ public class ChessBoard {
     /**
      * Initializes the images
      */
-    private void initImages() {
+    private static void initImages() {
         try {
-            Bishop.loadImages(getClass().getResource("/images/falseBishop.png"), getClass().getResource("/images/trueBishop.png"));
+            Bishop.loadImages(new File("src/images/falseBishop.png"), new File("src/images/trueBishop.png"));
         } catch(IOException e) {
             System.err.println("Could not find Bishop file images");
             System.exit(1); 
         }
         
         try {
-            King.loadImages(getClass().getResource("/images/falseKing.png"), getClass().getResource("/images/trueKing.png"));
+            King.loadImages(new File("src/images/falseKing.png"), new File("src/images/trueKing.png"));
         } catch(IOException e) {
             System.err.println("Could not find King file images");
             System.exit(1); 
         }
         
         try {
-            Knight.loadImages(getClass().getResource("/images/falseKnight.png"), getClass().getResource("/images/trueKnight.png"));
+            Knight.loadImages(new File("src/images/falseKnight.png"), new File("src/images/trueKnight.png"));
         } catch(IOException e) {
             System.err.println("Could not find Knight file images");
             System.exit(1); 
         }
         
         try {
-            Pawn.loadImages(getClass().getResource("/images/falsePawn.png"), getClass().getResource("/images/truePawn.png"));
+            Pawn.loadImages(new File("src/images/falsePawn.png"), new File("src/images/truePawn.png"));
         } catch(IOException e) {
             System.err.println("Could not find Pawn file images");
             System.exit(1); 
         }
         
         try {
-            Queen.loadImages(getClass().getResource("/images/falseQueen.png"), getClass().getResource("/images/trueQueen.png"));
+            Queen.loadImages(new File("src/images/falseQueen.png"), new File("src/images/trueQueen.png"));
         } catch(IOException e) {
             System.err.println("Could not find Queen file images");
             System.exit(1); 
         }
         
         try {
-            Rook.loadImages(getClass().getResource("/images/falseRook.png"), getClass().getResource("/images/trueRook.png"));
+            Rook.loadImages(new File("src/images/falseRook.png"), new File("src/images/trueRook.png"));
         } catch(IOException e) {
             System.err.println("Could not find Rook file images");
             System.exit(1); 
