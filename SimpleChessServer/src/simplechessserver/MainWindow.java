@@ -35,12 +35,17 @@ public class MainWindow extends JFrame {
     private ArrayList<Handler> handlers;
     
     /**
+     * This instance's DrawPanel.
+     */
+    private DrawPanel dp;
+    
+    /**
      * Creates a new MainWindow and shows it.
      */
     public MainWindow() {
         super("SimpleChessServer Console");
         handlers = new ArrayList<>();
-        DrawPanel dp = new DrawPanel();
+        dp = new DrawPanel();
         
         super.setPreferredSize(new Dimension(750, 500));
         super.setResizable(true);
@@ -84,6 +89,8 @@ public class MainWindow extends JFrame {
                 handlers.get(i).getName().compareToIgnoreCase(name) <= 0; i++) {
         }
         handlers.add(i, h);
+        
+        dp.addEntry();
     }
     
     /**
@@ -101,9 +108,10 @@ public class MainWindow extends JFrame {
      */
     private class DrawPanel extends JPanel implements Runnable {
         /**
-         * An int which keeps track of which one is open for inspection
+         * An ArrayList of Integers which keeps track of which one 
+         * is open for inspection.
          */
-        private int open = -1;
+        private ArrayList<Integer> animations;
         
         /**
          * The scroll bar for this Panel
@@ -111,20 +119,16 @@ public class MainWindow extends JFrame {
         private JScrollBar scrollBar;
         
         /**
-         * Which frame of the animation this item is on
-         */
-        private int animation = 0;
-        
-        /**
          * The total number of animation frames.
          * Must be a whole number
          */
-        private final double animationFrames = 10;
+        private static final double ANIMATION_FRAMES = 10;
         
         /**
-         * Whether a bar is opening
+         * An ArrayList of Booleans that keeps track which direction 
+         * a bar is opening.
          */
-        private boolean opening = false;
+        private ArrayList<Boolean> directions;
         
         /**
          * The height of the quick info bar for each user
@@ -135,45 +139,45 @@ public class MainWindow extends JFrame {
          * The height of the full info bar for the opened user
          */
         public static final int FULL_INFO_HEIGHT = 200;
+        
+        /**
+         * The amount a bar expands per frame
+         */
+        public static final int EXPANSION = 
+                (int) (FULL_INFO_HEIGHT / ANIMATION_FRAMES);
 
         /**
          * Creates a new DrawPanel.
          */
         public DrawPanel() {
+            animations = new ArrayList<>();
+            directions = new ArrayList<>();
             scrollBar = new JScrollBar(JScrollBar.VERTICAL, 0, 10, 0, 100);
             
             super.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent e) {
                     Point p = e.getPoint();
-                    if(open != -1 && p.x >= 15 && p.x <= 140) {
-                        int extra = (int) ((FULL_INFO_HEIGHT / animationFrames) 
-                                * animation), 
-                                baseY = QUICK_INFO_HEIGHT*open+
-                                        QUICK_INFO_HEIGHT+extra-35;
-                        if(p.y >= baseY && p.y <= baseY + 25) {
-                            LogWindow.run(handlers.get(open));
-                        }
-                    } else if(p.x >= getWidth() - 40 && p.x <= getWidth() - 10) {
-                        int extra;/* = (open == -1)?0: 0;*/
-                        if(open == -1) {
-                            extra = 0;
-                        } else {
-                            if(p.y < QUICK_INFO_HEIGHT*open+QUICK_INFO_HEIGHT) {
-                                extra = 0;
-                            } else if(p.y > QUICK_INFO_HEIGHT*open+
-                                    QUICK_INFO_HEIGHT+
-                                    (int) ((FULL_INFO_HEIGHT / animationFrames) 
-                                    * animation)) {
-                                extra = (int) ((FULL_INFO_HEIGHT / animationFrames) 
-                                    * animation);
-                            } else {
+                    for(int i = 0; i < handlers.size(); i++) {
+                        int animation = animations.get(i);
+                        int y0 = calculateSpace(i);
+                        if (animation == 10 && p.x >= 15 && p.x <= 140) {
+                            int baseY = y0 + QUICK_INFO_HEIGHT + 
+                                    FULL_INFO_HEIGHT - 35;
+                            if (p.y >= baseY && p.y <= baseY + 25) {
+                                LogWindow.run(handlers.get(i));
                                 return;
                             }
                         }
-                        int mod = (p.y - extra) % QUICK_INFO_HEIGHT;
-                        if(mod >= 25 && mod <= 55) {
-                            toggleOpen((p.y - extra) / QUICK_INFO_HEIGHT);
+                        if (p.x >= getWidth() - 40 && p.x <= getWidth() - 10) {
+                            if(p.y > y0 + QUICK_INFO_HEIGHT)
+                                continue;
+                            // thus, p.y <= y0 + QUICK_INFO_HEIGHT
+                            int mod = p.y - y0;
+                            if (mod >= 25 && mod <= 55) {
+                                toggleOpen(i);
+                                return;
+                            }
                         }
                     }
                 }
@@ -195,14 +199,10 @@ public class MainWindow extends JFrame {
          */
         @Override
         public void paint(Graphics g) {
-            // Some assertions
-            if(animation > animationFrames) 
-                assert false : "The animation counter is overflowing!";
             
             // Update scroll bar
-            int max = (int) ((FULL_INFO_HEIGHT / animationFrames) * animation) + 
-                    QUICK_INFO_HEIGHT * handlers.size();
-            scrollBar.setValues(scrollBar.getValue(), getHeight(), 0, max);
+            scrollBar.setValues(scrollBar.getValue(), getHeight(), 0, 
+                    calculateMax());
             
             Graphics2D g2D = (Graphics2D) g;
             
@@ -224,27 +224,23 @@ public class MainWindow extends JFrame {
             BasicStroke defaultStroke = new BasicStroke(2, 
                     BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
             
-            // extra space needed for open things
-            int extraSpace = (int) ((FULL_INFO_HEIGHT / animationFrames) * animation); 
-            
             for(int i = 0; i < handlers.size(); i++) {
                 Handler h = handlers.get(i);
+                int animation = animations.get(i);
+                int y0 = calculateSpace(i), extraSpace = animation * EXPANSION;
                 
                 g2D.setStroke(defaultStroke);
                 
-                int add = (open != -1 && i > open)?extraSpace:0;
-                
-                g2D.drawLine(0, QUICK_INFO_HEIGHT*i+QUICK_INFO_HEIGHT + add, 
-                        getWidth(), QUICK_INFO_HEIGHT*i + QUICK_INFO_HEIGHT + add);
+                g2D.drawLine(0, y0 + QUICK_INFO_HEIGHT, getWidth(), 
+                        y0 + QUICK_INFO_HEIGHT);
                 
                 g2D.setFont(fonts[2]);
                 String clientName = h.getClientName();
-                g2D.drawString((clientName == null)?"":clientName, 10, 
-                        QUICK_INFO_HEIGHT*i+40+add);
+                g2D.drawString((clientName == null)?"":clientName, 10, y0 + 40);
                 
                 g2D.setFont(fonts[1]);
                 g2D.drawString(h.socket.getInetAddress().getHostAddress(), 10, 
-                        QUICK_INFO_HEIGHT*i+70+add);
+                        y0 + 70);
                 
                 final int[] x = {getWidth() - 33, getWidth() - 25, 
                     getWidth() - 17};
@@ -252,40 +248,36 @@ public class MainWindow extends JFrame {
                 switch(h.getSide()) {
                     case 1:
                         g2D.setColor(Color.WHITE);
-                        g2D.fillRoundRect(getWidth() - 110, 
-                                QUICK_INFO_HEIGHT*i + 10 + add, 60, 60, 10, 10);
+                        g2D.fillRoundRect(getWidth() - 110, y0 + 10, 
+                                60, 60, 10, 10);
                         g2D.setColor(Color.BLACK);
-                        g2D.drawRoundRect(getWidth() - 110, 
-                                QUICK_INFO_HEIGHT*i + 10 + add, 60, 60, 10, 10);
+                        g2D.drawRoundRect(getWidth() - 110, y0 + 10, 
+                                60, 60, 10, 10);
                         break;
                     case 0:
                         // g2D.setColor(Color.BLACK);
                         g2D.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, 
                                 BasicStroke.JOIN_ROUND, 1.0f, 
                                 new float[]{7.5f}, 0.0f));
-                        g2D.drawRoundRect(getWidth() - 110, 
-                                QUICK_INFO_HEIGHT*i + 10 + add, 60, 60, 10, 10);
+                        g2D.drawRoundRect(getWidth() - 110, y0 + 10, 
+                                60, 60, 10, 10);
                         g2D.setStroke(defaultStroke);
                         break;
                     case -1:
                         // g2D.setColor(Color.BLACK);
-                        g2D.fillRoundRect(getWidth() - 110, 
-                                QUICK_INFO_HEIGHT*i + 10 + add, 60, 60, 10, 10);
+                        g2D.fillRoundRect(getWidth() - 110, y0 + 10, 
+                                60, 60, 10, 10);
                         break;
                 }
                 
                 /*
                 Hitbox: getWidth() - 40, QUICK_INFO_HEIGHT*i + 25, 30, 30
                 */
-                final int[] y_down = {QUICK_INFO_HEIGHT*i+33+add, 
-                            QUICK_INFO_HEIGHT*i+47+add, 
-                            QUICK_INFO_HEIGHT*i+33+add}, 
-                        y_up = {QUICK_INFO_HEIGHT*i+47+add, 
-                            QUICK_INFO_HEIGHT*i+33+add, 
-                            QUICK_INFO_HEIGHT*i+47+add};
+                final int[] y_down = {y0 + 33, y0 + 47, y0 + 33}, 
+                        y_up = {y0 + 47, y0 + 33, y0 + 47};
                 
-                if(i == open) {
-                    double multUp = animation / animationFrames, 
+                if(animations.get(i) != 0) {
+                    double multUp = animation / ANIMATION_FRAMES, 
                             multDown = 1 - multUp;
                     int[] y = new int[3];
                     for(int j = 0; j < y.length; j++) {
@@ -317,7 +309,7 @@ public class MainWindow extends JFrame {
                             default:
                                 throw new IllegalStateException("Handler.side should be either 1, 0, or -1.");
                         }
-                        g2D.drawString(s1, 15, QUICK_INFO_HEIGHT*i+QUICK_INFO_HEIGHT+20);
+                        g2D.drawString(s1, 15, y0+QUICK_INFO_HEIGHT+20);
                         
                         String s2 = "";
                         byte[] address = h.socket.getInetAddress().getAddress();
@@ -328,21 +320,20 @@ public class MainWindow extends JFrame {
                             }
                         }
                         g2D.drawString("IP: " + s2 + " - " + h.socket.getInetAddress().getHostAddress(), 
-                                15, QUICK_INFO_HEIGHT*i+QUICK_INFO_HEIGHT+40);
+                                15, y0+QUICK_INFO_HEIGHT+40);
                         
                         Point tl = new Point(15, 
-                                QUICK_INFO_HEIGHT*i+QUICK_INFO_HEIGHT+extraSpace-35), 
+                                y0+QUICK_INFO_HEIGHT+extraSpace-35), 
                                 br = new Point(tl.x+125, tl.y+25);
                         g2D.setPaint(new GradientPaint(tl, Color.LIGHT_GRAY, br, Color.GRAY));
                         g2D.fillRect(tl.x, tl.y, 125, 25);
                         g2D.setColor(Color.BLACK);
                         g2D.drawString("Open log window", 22.5f, 
-                                QUICK_INFO_HEIGHT*i+QUICK_INFO_HEIGHT+
-                                        extraSpace-17.5f);
+                                y0+QUICK_INFO_HEIGHT+extraSpace-17.5f);
                         
                         if(h.getSide() != 0) {
                             final int SQ = 20;
-                            int baseY = QUICK_INFO_HEIGHT*i+QUICK_INFO_HEIGHT+10, 
+                            int baseY = y0+QUICK_INFO_HEIGHT+10, 
                                     baseX = getWidth() - 8*SQ - 10;
                             
                             g2D.setColor(new Color(181, 136, 99));
@@ -372,8 +363,8 @@ public class MainWindow extends JFrame {
                     }
                     
                     g2D.setColor(Color.BLACK);
-                    g2D.drawLine(0, QUICK_INFO_HEIGHT*i+QUICK_INFO_HEIGHT+extraSpace, 
-                            getWidth(), QUICK_INFO_HEIGHT*i+QUICK_INFO_HEIGHT+extraSpace);
+                    g2D.drawLine(0, y0+QUICK_INFO_HEIGHT+extraSpace, 
+                            getWidth(), y0+QUICK_INFO_HEIGHT+extraSpace);
                 } else {
                     // standard triangle
                     Polygon tri = new Polygon(x, y_down, 3);
@@ -385,13 +376,7 @@ public class MainWindow extends JFrame {
             }
             
             // Update variables
-            if(animation > 0 && animation < 10) {
-                if(opening) animation++;
-                else animation--;
-            }
-            if(animation == 0) {
-                open = -1;
-            }
+            updateVariables();
         }
         
         /**
@@ -399,13 +384,55 @@ public class MainWindow extends JFrame {
          * @param client which client to toggle
          */
         public void toggleOpen(int client) {
-            open = client;
+            int animation = animations.get(client);
             if(animation == 0) {
-                animation++;
+                animations.set(client, animation + 1);
             } else if(animation == 10) {
-                animation--;
+                animations.set(client, animation - 1);
             }
-            opening = !opening;
+            directions.set(client, !directions.get(client));
+        }
+        
+        /**
+         * Updates all variables
+         */
+        private void updateVariables() {
+            for(int i = 0; i < handlers.size(); i++) {
+                int animation = animations.get(i);
+                if(animation > 0 && animation < 10) {
+                    if(directions.get(i)) animations.set(i, animation + 1);
+                    else animations.set(i, animation - 1);
+                }
+            }
+        }
+        
+        /**
+         * Adds an additional entry to the table.
+         */
+        public void addEntry() {
+            animations.add(0);
+            directions.add(false);
+        }
+        
+        /**
+         * Calculates how much space is needed above the specified bar
+         * @param bar the bar to calculate for
+         * @return the amount of space needed
+         */
+        private int calculateSpace(int bar) {
+            int output = QUICK_INFO_HEIGHT * bar;
+            for(int i = 0; i < bar; i++) {
+                output += animations.get(i) * EXPANSION;
+            }
+            return output;
+        }
+        
+        /**
+         * Calculates the maximum of the scroll bar
+         * @return the maximum of the scroll bar
+         */
+        private int calculateMax() {
+            return calculateSpace(handlers.size()) + 3;
         }
 
         /**
